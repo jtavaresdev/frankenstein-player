@@ -32,6 +32,13 @@ namespace core {
          * @param id Novo ID da entidade
          */
         void setId(unsigned id);
+
+        /**
+         * @brief Compara duas entidades
+         * @param other Entidade a ser comparada
+         * @return true se as entidades forem iguais, false caso contrário
+         */
+         bool operator==(const Entity& other) const;
     };
 
 }
