@@ -61,6 +61,7 @@ notas*
 
 # ide
 .vscode/
+.zed/
 
 # diretórios de persistência
 data/
