@@ -67,7 +67,7 @@ cd docs/
 doxygen Doxyfile
 
 # A documentação estará em:
-# docs/html/index.html
+# docs/latex/refman.pdf
 ```
 
 ## 👥 Autores
