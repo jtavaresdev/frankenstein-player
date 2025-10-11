@@ -5,7 +5,7 @@ Um sistema completo para gerenciamento local de músicas, álbuns, artistas e re
 ## 📖 Documentação
 
 A documentação completa do projeto está disponível em:  
-**[Documentação Doxygen](docs/html/index.html)**
+**[Documentação Doxygen](docs/output/html/index.html)**
 
 ## 🏗️ Estrutura do Projeto
 
@@ -78,4 +78,4 @@ doxygen Doxyfile
 - **Julia Reis**
 - **Pedro Barruetavena**
 
-**📚 Documentação Detalhada:** [docs/html/index.html](docs/html/index.html)  
+**📚 Documentação Detalhada:** [docs/html/index.html](docs/output/html/index.html)  
