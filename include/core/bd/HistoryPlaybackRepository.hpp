@@ -1,0 +1,88 @@
+/**
+ * @file HistoryPlaybackRepository.hpp
+ * @brief Repositorio de historico de reproducoes
+ * @ingroup bd
+ *
+ * Repositorio para gerenciar operacoes de CRUD para a entidade HistoryPlayback.
+ *
+ * @author Eloy Maciel
+ * @date 2025-10-09
+ */
+
+#ifndef HISTORYPLAYBACKREPOSITORY_HPP
+#define HISTORYPLAYBACKREPOSITORY_HPP
+
+#include <vector>
+#include <memory>
+
+#include "core/bd/IRepository.hpp"
+#include "core/entities/EntitiesFWD.hpp"
+
+namespace core {
+
+    /**
+     * @brief Repositorio de historico de reproducoes
+     * Repositorio para gerenciar operacoes de CRUD para a entidade HistoryPlayback.
+     */
+    class HistoryPlaybackRepository : public IRepository<HistoryPlayback> {
+    public:
+        HistoryPlaybackRepository(std::shared_ptr<SQLite::Database> db);
+        ~HistoryPlaybackRepository() override = default;
+
+        /**
+         * @brief Salva ou atualiza um historico de reproducao no repositório
+         * @copydoc IRepository::save
+         * @param entity Historico de reproducao a ser salvo ou atualizado
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool save(const HistoryPlayback& entity) override;
+
+        /**
+         * @brief Remove um historico de reproducao do repositório pelo ID
+         * @copydoc IRepository::remove
+         * @param id ID do historico de reproducao a ser removido
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool remove(unsigned id) override;
+
+        /**
+         * @brief Obtém todos os historicos de reproducoes do repositório
+         * @copydoc IRepository::getAll
+         * @return Vetor contendo todos os historicos de reproducoes
+         */
+        std::vector<std::shared_ptr<HistoryPlayback>> getAll() const override;
+
+        /**
+         * @brief Busca historicos de reproducoes pelo usuário
+         * @param user Usuário cujos historicos de reproducoes serão buscados
+         * @return Vetor contendo os historicos de reproducoes do usuário fornecido
+         */
+        std::vector<std::shared_ptr<HistoryPlayback>> findByUser(const User& user) const;
+
+        /**
+         * @brief Insere um historico de reproducao no repositório
+         * @param entity Historico de reproducao a ser inserido
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool insertHistoryPlayback(const HistoryPlayback& entity);
+
+        /**
+         * @brief Insere multiplos historicos de reproducoes no repositório
+         * @param entities Vetor contendo os historicos de reproducoes a serem inseridos
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool insertHistoryPlayback(const std::vector<HistoryPlayback>& entities);
+
+        /**
+         * @brief Conta o número de reproduções de uma música por um usuário específico
+         * @param user Usuário cujas reproduções serão contadas
+         * @param song Música cujas reproduções serão contadas
+         * @return Número de reproduções da música pelo usuário
+        */
+        unsigned countPlaybacksByUserAndSong(const User& user, const Song& song) const;
+    };
+
+}
+
+
+#endif
