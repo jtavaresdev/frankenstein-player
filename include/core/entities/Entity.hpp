@@ -13,37 +13,35 @@
 
 namespace core {
 
-    /**
-     * @brief Interface para entidades do sistema
-     * Interface que define caracteristicas essenciais para entidades do sistema.
-     */
-    class Entity {
-    protected:
-        unsigned id = 0; /**< ID da entidade */
+/**
+ * @brief Interface para entidades do sistema
+ * Interface que define caracteristicas essenciais para entidades do sistema.
+ */
+class Entity {
+protected:
+  unsigned id = 0; /**< ID da entidade */
 
-    public:
-        virtual ~Entity() = default;
+public:
+  virtual ~Entity() = default;
+  /**
+   * @brief Obtém o ID da entidade
+   * @return ID da entidade
+   */
+  unsigned getId() const;
 
-        /**
-         * @brief Obtém o ID da entidade
-         * @return ID da entidade
-         */
-        unsigned getId() const;
+  /**
+   * @brief Define o ID da entidade
+   * @param id Novo ID da entidade
+   */
+  void setId(unsigned id);
 
-        /**
-         * @brief Define o ID da entidade
-         * @param id Novo ID da entidade
-         */
-        void setId(unsigned id);
-
-        /**
-         * @brief Compara duas entidades
-         * @param other Entidade a ser comparada
-         * @return true se as entidades forem iguais, false caso contrário
-         */
-         virtual bool operator==(const Entity& other) const = 0;
-    };
-
-}
+  /**
+   * @brief Compara duas entidades
+   * @param other Entidade a ser comparada
+   * @return true se as entidades forem iguais, false caso contrário
+   */
+  virtual bool operator==(const Entity &other) const = 0;
+};
+} // namespace core
 
 #endif
