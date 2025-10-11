@@ -1,0 +1,89 @@
+/**
+ * @file AlbumRepository.hpp
+ * @brief Repositorio de albuns
+ * @ingroup bd
+ *
+ * Repositorio para gerenciar operacoes de CRUD para a entidade Album.
+ *
+ * @author Eloy Maciel
+ * @date 2025-10-09
+ */
+
+#ifndef ALBUMREPOSITORY_HPP
+#define ALBUMREPOSITORY_HPP
+
+#include <vector>
+#include <string>
+#include <memory>
+
+#include "core/bd/IRepository.hpp"
+#include "core/entities/EntitiesFWD.hpp"
+
+namespace core {
+
+    /**
+     * @brief Repositorio de albuns
+     * Repositorio para gerenciar operacoes de CRUD para a entidade Album.
+     */
+    class AlbumRepository : public IRepository<Album> {
+    public:
+        AlbumRepository(std::shared_ptr<SQLite::Database> db);
+        ~AlbumRepository() override = default;
+
+        /**
+         * @brief Salva ou atualiza um album no repositório
+         * @copydoc IRepository::save
+         * @param entity Album a ser salvo ou atualizado
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool save(const Album& entity) override;
+
+        /**
+         * @brief Remove um album do repositório pelo ID
+         * @copydoc IRepository::remove
+         * @param id ID do album a ser removido
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool remove(unsigned id) override;
+
+        /**
+         * @brief Obtém todos os albuns do repositório
+         * @copydoc IRepository::getAll
+         * @return Vetor contendo todos os albuns
+         */
+        std::vector<std::shared_ptr<Album>> getAll() const override;
+
+        /**
+         * @brief Busca albuns pelo título e usuário
+         * @param title Título do album a ser buscado
+         * @param user Usuário cujos albuns serão buscados
+         * @return Vetor contendo os albuns que correspondem ao título fornecido
+         */
+        std::vector<std::shared_ptr<Album>> findByTitleAndUser(const std::string& title, const User& user) const;
+
+        /**
+         * @brief Busca albuns pelo usuário
+         * @param user Usuário cujos albuns serão buscados
+         * @return Vetor contendo os albuns que pertencem ao usuário fornecido
+         */
+         std::vector<std::shared_ptr<Album>> findByUser(const User& user) const;
+
+        /**
+         * @brief Busca albuns pelo artista e usuário
+         * @param artist Nome do artista do album a ser buscado
+         * @return Vetor contendo os albuns que correspondem ao artista fornecido
+         */
+        std::vector<std::shared_ptr<Album>> findByArtist(const std::string& artist) const;
+
+        /**
+         * @brief Obtém um album pelo ID e usuário
+         * @copydoc IRepository::findById
+         * @param id ID do album a ser obtido
+         * @return Ponteiro compartilhado para o album encontrado, ou nullptr se não encontrado
+         */
+        std::shared_ptr<Album> findById(unsigned id) const override;
+    };
+}
+
+
+#endif
