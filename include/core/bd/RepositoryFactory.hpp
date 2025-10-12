@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <future>
 #include <memory>
 #include <SQLiteCpp/SQLiteCpp.h>
 

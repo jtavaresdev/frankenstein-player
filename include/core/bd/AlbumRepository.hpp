@@ -110,5 +110,19 @@ namespace core {
          * @return Vetor contendo as músicas do álbum
          */
         std::vector<std::shared_ptr<Song>> getSongs(const Album& album) const;
+
+        /**
+         * @brief Obtém os artistas colaboradores de um álbum
+         * @param album Álbum cujos artistas colaboradores serão obtidos
+         * @return Vetor contendo os artistas colaboradores do álbum
+         */
+        std::vector<std::shared_ptr<Artist>> getFeaturingArtists(const Album& album) const;
+
+        /**
+         * @brief Obtém o artista principal de um álbum
+         * @param album Álbum cujo artista principal será obtido
+         * @return Ponteiro compartilhado para o artista principal do álbum
+         */
+        std::shared_ptr<Artist> getArtist(const Album& album) const;
     };
 }
