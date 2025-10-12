@@ -9,13 +9,14 @@
  * @date 2025-10-09
  */
 
-#ifndef HISTORYPLAYBACKREPOSITORY_HPP
-#define HISTORYPLAYBACKREPOSITORY_HPP
+#pragma onde
 
 #include <vector>
 #include <memory>
 
-#include "core/bd/IRepository.hpp"
+#include <SQLiteCpp/SQLiteCpp.h>
+
+#include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/entities/EntitiesFWD.hpp"
 
 namespace core {
@@ -24,7 +25,23 @@ namespace core {
      * @brief Repositorio de historico de reproducoes
      * Repositorio para gerenciar operacoes de CRUD para a entidade HistoryPlayback.
      */
-    class HistoryPlaybackRepository : public IRepository<HistoryPlayback> {
+    class HistoryPlaybackRepository : public SQLiteRepositoryBase<HistoryPlayback> {
+    protected:
+        /**
+         * @brief Insere um novo historico de reproducao no repositório
+         * @copydoc IRepository::insert
+         * @param entity Historico de reproducao a ser inserido
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool insert(const HistoryPlayback& entity) override;
+
+        /**
+         * @brief Atualiza um historico de reproducao existente no repositório
+         * @copydoc IRepository::update
+         * @param entity Historico de reproducao a ser atualizado
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool update(const HistoryPlayback& entity) override;
     public:
         HistoryPlaybackRepository(std::shared_ptr<SQLite::Database> db);
         ~HistoryPlaybackRepository() override = default;
@@ -83,6 +100,3 @@ namespace core {
     };
 
 }
-
-
-#endif

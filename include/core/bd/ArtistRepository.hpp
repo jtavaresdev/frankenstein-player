@@ -9,14 +9,15 @@
  * @date 2025-10-09
  */
 
-#ifndef ARTISTREPOSITORY_HPP
-#define ARTISTREPOSITORY_HPP
+#pragma onde
 
 #include <vector>
 #include <string>
 #include <memory>
 
-#include "core/bd/IRepository.hpp"
+#include <SQLiteCpp/SQLiteCpp.h>
+
+#include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/entities/EntitiesFWD.hpp"
 
 namespace core {
@@ -25,9 +26,22 @@ namespace core {
      * @brief Repositorio de artistas
      * Repositorio para gerenciar operacoes de CRUD para a entidade Artist.
      */
-    class ArtistRepository : public IRepository<Artist> {
+    class ArtistRepository : public SQLiteRepositoryBase<Artist> {
     protected:
+        /**
+         * @brief Insere um novo artista no repositório
+         * @copydoc IRepository::insert
+         * @param entity Artista a ser inserido
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
         bool insert(const Artist& entity) override;
+
+        /**
+         * @brief Atualiza um artista existente no repositório
+         * @copydoc IRepository::update
+         * @param entity Artista a ser atualizado
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
         bool update(const Artist& entity) override;
 
     public:
@@ -80,5 +94,3 @@ namespace core {
     };
 
 }
-
-#endif // ARTISTREPOSITORY_HPP

@@ -9,12 +9,13 @@
  * @date 2025-10-09
  */
 
-#ifndef USERREPOSITORY_HPP
-#define USERREPOSITORY_HPP
+#pragma onde
 
 #include <vector>
 
-#include "core/bd/IRepository.hpp"
+#include <SQLiteCpp/SQLiteCpp.h>
+
+#include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/entities/EntitiesFWD.hpp"
 
 namespace core {
@@ -23,9 +24,22 @@ namespace core {
      * @brief Repositorio de usuarios
      * Repositorio para gerenciar operacoes de CRUD para a entidade User.
      */
-    class UserRepository : public IRepository<User> {
+    class UserRepository : public SQLiteRepositoryBase<User> {
     protected:
+        /**
+         * @brief Insere um novo usuario no repositório
+         * @copydoc IRepository::insert
+         * @param entity Usuario a ser inserido
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
         bool insert(const User& entity) override;
+
+        /**
+         * @brief Atualiza um usuario existente no repositório
+         * @copydoc IRepository::update
+         * @param entity Usuario a ser atualizado
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
         bool update(const User& entity) override;
 
     public:
@@ -72,6 +86,3 @@ namespace core {
     };
 
 }
-
-
-#endif

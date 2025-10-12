@@ -9,14 +9,15 @@
  * @date 2025-10-09
  */
 
-#ifndef PLAYLISTREPOSITORY_HPP
-#define PLAYLISTREPOSITORY_HPP
+#pragma onde
 
 #include <vector>
 #include <string>
 #include <memory>
 
-#include "core/bd/IRepository.hpp"
+#include <SQLiteCpp/SQLiteCpp.h>
+
+#include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/entities/EntitiesFWD.hpp"
 
 namespace core {
@@ -25,7 +26,23 @@ namespace core {
      * @brief Repositorio de playlists
      * Repositorio para gerenciar operacoes de CRUD para a entidade Playlist.
      */
-    class PlaylistRepository : public IRepository<Playlist> {
+    class PlaylistRepository : public SQLiteRepositoryBase<Playlist> {
+    protected:
+        /**
+         * @brief Insere uma nova playlist no repositório
+         * @copydoc IRepository::insert
+         * @param entity Playlist a ser inserida
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool insert(const Playlist& entity) override;
+
+        /**
+         * @brief Atualiza uma playlist existente no repositório
+         * @copydoc IRepository::update
+         * @param entity Playlist a ser atualizada
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool update(const Playlist& entity) override;
     public:
         PlaylistRepository(std::shared_ptr<SQLite::Database> db);
         ~PlaylistRepository() override = default;
@@ -77,6 +94,3 @@ namespace core {
         std::shared_ptr<Playlist> findById(unsigned id) const override;
     };
 }
-
-
-#endif

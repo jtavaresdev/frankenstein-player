@@ -9,14 +9,15 @@
  * @date 2025-10-09
  */
 
-#ifndef SONGREPOSITORY_HPP
-#define SONGREPOSITORY_HPP
+#pragma onde
 
 #include <vector>
 #include <string>
 #include <memory>
 
-#include "core/bd/IRepository.hpp"
+#include <SQLiteCpp/SQLiteCpp.h>
+
+#include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/entities/EntitiesFWD.hpp"
 // #include "model/Song.hpp"
 
@@ -26,9 +27,22 @@ namespace core {
      * @brief Repositorio de musicas
      * Repositorio para gerenciar operacoes de CRUD para a entidade Song.
      */
-    class SongRepository : public IRepository<Song> {
+    class SongRepository : public SQLiteRepositoryBase<Song> {
     protected:
+        /**
+         * @brief Insere uma nova musica no repositório
+         * @copydoc IRepository::insert
+         * @param entity Musica a ser inserida
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
         bool insert(const Song& entity) override;
+
+        /**
+         * @brief Atualiza uma musica existente no repositório
+         * @copydoc IRepository::update
+         * @param entity Musica a ser atualizada
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
         bool update(const Song& entity) override;
 
     public:
@@ -95,5 +109,3 @@ namespace core {
     };
 
 }
-
-#endif
