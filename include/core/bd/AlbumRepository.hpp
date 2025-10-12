@@ -9,14 +9,15 @@
  * @date 2025-10-09
  */
 
-#ifndef ALBUMREPOSITORY_HPP
-#define ALBUMREPOSITORY_HPP
+#pragma onde
 
 #include <vector>
 #include <string>
 #include <memory>
 
-#include "core/bd/IRepository.hpp"
+#include <SQLiteCpp/SQLiteCpp.h>
+
+#include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/entities/EntitiesFWD.hpp"
 
 namespace core {
@@ -25,7 +26,24 @@ namespace core {
      * @brief Repositorio de albuns
      * Repositorio para gerenciar operacoes de CRUD para a entidade Album.
      */
-    class AlbumRepository : public IRepository<Album> {
+    class AlbumRepository : public SQLiteRepositoryBase<Album> {
+    protected:
+        /**
+         * @brief Insere um novo album no repositório
+         * @copydoc IRepository::insert
+         * @param entity Album a ser inserido
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool insert(const Album& entity) override;
+
+        /**
+         * @brief Atualiza um album existente no repositório
+         * @copydoc IRepository::update
+         * @param entity Album a ser atualizado
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
+        bool update(const Album& entity) override;
+
     public:
         AlbumRepository(std::shared_ptr<SQLite::Database> db);
         ~AlbumRepository() override = default;
@@ -84,6 +102,3 @@ namespace core {
         std::shared_ptr<Album> findById(unsigned id) const override;
     };
 }
-
-
-#endif
