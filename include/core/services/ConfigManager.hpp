@@ -28,7 +28,8 @@ namespace core {
     public:
         enum Enviroment {
             DEVELOPMENT,
-            PRODUCTION
+            PRODUCTION,
+            TESTING
         };
 
         /**
