@@ -11,8 +11,14 @@
 #pragma once
 
 #include "../interfaces/IPlayable.hpp"
+#include "../services/PlaybackQueue.hpp"
+#include "Song.hpp"
 #include <memory>
 #include <vector>
+
+namespace core {
+
+enum class PlayerState { STOPPED, PLAYING, PAUSED };
 
 /**
  * @class Player
@@ -24,50 +30,88 @@
  */
 class Player {
 private:
-  std::vector<std::shared_ptr<core::IPlayable>> _playlist;
-  std::shared_ptr<core::IPlayable> _currentSong;
-  int _currentIndex;
+  std::vector<std::shared_ptr<core::PlaybackQueue>> _queue;
+  std::shared_ptr<core::Song>
+      _currentSong;  // chamar metodo de PlayBackQueue getCurrentSong
+  int _currentIndex; // chamar do metodo PlayBackQueue findCurrentIndex
+  PlayerState playerState;
   bool _isPlaying;
+  bool _isLooping;
   bool _isStopped;
   float _volume;
+  float _previousVolume;
 
 public:
   /**
    * @brief Construtor da classe Player
-   *
    * Inicializa o player com estado parado e volume máximo.
+   * Deve criar o vetor de _queue vazio.
    */
   Player();
 
   /**
-   * @brief Reproduz uma música específica
-   * @param IPlayableObject a ser reproduzida
+   * @brief Construtor da classe Player
+   * Inicializa o player com estado playing e volume máximo.
+   * Deve criar o vetor de _queue com tracks no index 0
    */
-  void play(const core::IPlayableObject &song);
+  Player(const core::PlaybackQueue &tracks);
 
   /**
-   * @brief Reproduz uma lista de músicas
-   * @param vector de IPlayable de músicas a serem reproduzidas em sequência
+   * @brief Destrutor
+   * Libera recursos
    */
-  void play(const std::vector<core::IPlayable> &songs);
+  ~Player();
+
+  /**
+   * @brief Adicionar uma Queue ao vector _queue
+   *
+   */
+  void addPlaybackQueue(const core::PlaybackQueue &tracks);
+
+  /**
+   * @brief Reproduz música atual na Queue
+   * @param PlayBackQueue a ser reproduzida
+   */
+
+  void play();
 
   /**
    * @brief Pausa a reprodução atual
-   *
-   * Mantém a música atual carregada mas para a reprodução.
+   * Mantém a música atual carregada mas para a reprodução
+   * Altera o estado bool do Player e o Enum
    */
   void pause();
 
   /**
+   * @brief Logica para tocar proxima música
+   * @param PlayBackQueue a ser reproduzida
+   * Lógica para reprodução automatica, deve analisar se está em loop e
+   * se for a ultima musica da queue, deve iniciar a mesma
+   */
+  void playNextSong();
+
+  /**
    * @brief Retoma a reprodução pausada
-   *
    * Continua a reprodução da música atual de onde parou.
+   * Altera o estado bool do Player e o Enum
    */
   void resume();
 
   /**
+   * @brief Retrocede alguns segundos da musica atual
+   */
+
+  void rewind();
+
+  /**
+   * @brief Avança alguns segundos da musica atual
+   */
+  void fastForward();
+
+  /**
    * @brief Avança para a próxima música na playlist
-   *
+   * Iterar sobre a QUEUE, caso o index atual nao tiver musica
+   * alterar para a proxima posição
    * Se estiver na última música, pode parar ou voltar para o início
    * dependendo da implementação.
    */
@@ -76,10 +120,21 @@ public:
   /**
    * @brief Volta para a música anterior na playlist
    *
-   * Se estiver na primeira música, pode parar ou ir para a última
-   * dependendo da implementação.
+   * Depende a implementação, pois pode voltar de Queue ou apenas
+   * nas músicas de uma queue.
    */
   void previous();
+
+  /**
+   * @brief Define a musica atual em looping
+   */
+  void setLooping();
+
+  /**
+   * @brief Remove o looping atual
+   */
+
+  void unsetLooping();
 
   /**
    * @brief Define o nível de volume do player
@@ -108,10 +163,10 @@ public:
   void unmute();
 
   /**
-   * @brief Obtém a música atualmente em reprodução
-   * @return IPlayableObject atual inválida se não houver reprodução
+   * @brief Obtém o estado atual do Player
+   * @return Enum do tipo PlayerState
    */
-  core::IPlayableObject getCurrentSong() const;
+  PlayerState stateOfPlayer() const;
 
   /**
    * @brief Verifica se o player está reproduzindo
@@ -126,6 +181,13 @@ public:
   bool isPaused() const;
 
   /**
+   * @brief Verifica se o player está em loop
+   * @return true se está em loop false caso contrário
+   */
+
+  bool isLooping() const;
+
+  /**
    * @brief Obtém o progresso atual da reprodução
    * @return Progresso entre 0.0 (início) e 1.0 (fim) da música atual
    */
@@ -133,55 +195,31 @@ public:
 
   /**
    * @brief Obtém o tamanho da playlist atual
+   * Iterar sobra o index atual da _queue
    * @return Número de músicas na playlist
    */
   int getPlaylistSize() const;
 
   /**
    * @brief Limpa toda a playlist
-   *
-   * Remove todas as músicas da playlist e para a reprodução atual.
+   * Remove todas as músicas do index da queue ou todas queue, depende
+   * da implementação.
    */
   void clearPlaylist();
 
   /**
-   * @brief Obtém uma cópia da playlist atual
-   * @return Vector com todos IPlayables da playlist
-   */
-  std::vector<core::IPlayable> getPlaylist() const;
-
-  /**
-   * @brief Avança para a próxima música na sequência
-   * @internal Método interno para navegação
-   */
-  void advanceToNext();
-
-  /**
-   * @brief Retrocede para a música anterior na sequência
-   * @internal Método interno para navegação
-   */
-  void goToPrevious();
-
-  /**
    * @brief Verifica se existe próxima música na playlist
+   * Utiliza do método da Classe PlaybackQueue
    * @return true se há próxima música, false caso contrário
-   * @internal Método interno para navegação
    */
   bool hasNext() const;
 
   /**
    * @brief Verifica se existe música anterior na playlist
+   * Utiliza do método da Classe PlaybackQueue
    * @return true se há música anterior, false caso contrário
-   * @internal Método interno para navegação
    */
   bool hasPrevious() const;
-
-  /**
-   * @brief Carrega o áudio de um IPlayable para reprodução
-   * @param song Música a ser carregada
-   * @internal Método interno para carregamento de áudio
-   */
-  void loadAudio(const core::IPlayableObject &song);
 };
-
+} // namespace core
 #pragma once
