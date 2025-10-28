@@ -18,8 +18,12 @@
 #include <string>
 #include <vector>
 
+#include "Entity.hpp"
+#include "core/entities/Artist.hpp"
 #include "core/entities/Entity.hpp"
 #include "core/entities/Song.hpp"
+#include "core/interfaces/ICollection.hpp"
+#include "core/interfaces/IPlayable.hpp"
 
 namespace core {
 
@@ -158,6 +162,22 @@ public:
    * @return String com nome, artista, ano e quantidade de músicas
    */
   std::string toString() const;
+
+  // Métodos Entity
+
+  /**
+   * @brief Compara dois Albums
+   * @param other Album a ser comparada
+   * @return true se as entidades forem iguais, false caso contrário
+   */
+  virtual bool operator==(const Entity &other) const override;
+
+  /**
+   * @brief Compara dois Albums para desigualdade
+   * @param other Album a ser comparada
+   * @return true se as entidades forem diferentes, false caso contrário
+   */
+  virtual bool operator!=(const Entity &other) const override;
 };
 
 } // namespace core

@@ -10,9 +10,9 @@
  */
 #pragma once
 
+#include "core/entities/Song.hpp"
 #include "core/interfaces/IPlayable.hpp"
 #include "core/services/PlaybackQueue.hpp"
-#include "core/entities/Song.hpp"
 #include <memory>
 #include <vector>
 
@@ -100,18 +100,24 @@ public:
   /**
    * @brief Reinicia a música atual
    */
-    void restart();
+  void restart();
 
   /**
    * @brief Retrocede alguns segundos da musica atual
+   * @param int seconds para retroceder
    */
 
   void rewind(unsigned int seconds);
 
+  /**
+   * @brief Avança e retroce na música relativamente
+   * @param int seconds / negativo retroce, posição avança
+   */
   void seek(int seconds);
 
   /**
    * @brief Avança alguns segundos da musica atual
+   * @param int seconds para avançar
    */
   void fastForward(unsigned int seconds);
 
@@ -119,7 +125,7 @@ public:
    * @brief Obtém tempo decorrido da música atual em segundos
    * @return Tempo decorrido em segundos
    */
-    unsigned int getElapsedTime() const;
+  unsigned int getElapsedTime() const;
 
   /**
    * @brief Avança para a próxima música na playlist

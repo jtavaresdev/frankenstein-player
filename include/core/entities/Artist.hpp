@@ -13,8 +13,11 @@
 #pragma once
 
 #include "Album.hpp"
+#include "Entity.hpp"
 #include "Song.hpp"
+#include "core/entities/Entity.hpp"
 #include "core/entities/User.hpp"
+#include "core/interfaces/ICollection.hpp"
 #include "core/interfaces/IPlayable.hpp"
 #include <functional>
 #include <memory>
@@ -193,5 +196,20 @@ public:
    * @return true se possui pelo menos um álbum, false caso contrário
    */
   bool hasAlbum() const;
+  // Métodos Entity
+
+  /**
+   * @brief Compara dois Artistas
+   * @param other Artista a ser comparada
+   * @return true se as entidades forem iguais, false caso contrário
+   */
+  virtual bool operator==(const Entity &other) const override;
+
+  /**
+   * @brief Compara dois Artistas para desigualdade
+   * @param other Artista a ser comparada
+   * @return true se as entidades forem diferentes, false caso contrário
+   */
+  virtual bool operator!=(const Entity &other) const override;
 };
 } // namespace core
