@@ -11,16 +11,15 @@
  */
 
 #pragma once
-
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "../entities/Entity.hpp"
-#include "../interfaces/ICollection.hpp"
-#include "../interfaces/IPlayable.hpp"
-#include "../interfaces/IPlayableObject.hpp"
+#include "core/entities/Entity.hpp"
+#include "core/interfaces/IPlayable.hpp"
+#include "core/interfaces/IPlayableObject.hpp"
+#include "core/interfaces/ICollection.hpp"
 
 namespace core {
 // Forward declaration
