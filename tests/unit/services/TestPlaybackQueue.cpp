@@ -58,14 +58,6 @@ public:
     }
     return playableObjects;
   }
-
-  void play() override {}
-
-  void pause() override {}
-
-  void stop() override {}
-
-  int getId() const override { return _id; }
 };
 
 // CONSTRUTORES

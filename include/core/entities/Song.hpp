@@ -196,23 +196,5 @@ public:
    */
   std::vector<std::shared_ptr<IPlayableObject>> getPlayableObjects() const;
 
-  /**
-   * @brief Inicia a reprodução da música
-   */
-  void play() override;
-
-  /**
-   * @brief Pausa a reprodução da música
-   */
-  void pause() override;
-
-  /**
-   * @brief Para a reprodução da música
-   */
-  void stop() override;
-
-  int getId() const override;
-};
-
+}; // namespace core
 } // namespace core
-#pragma once
