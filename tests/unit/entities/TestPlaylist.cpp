@@ -30,7 +30,7 @@ TEST_SUITE("Unit Tests - Entity: Playlist")
     // TESTE 1: COnstrutores
     TEST_CASE("Playlist: Construtores")
     {
-        SUBCASE(" construtor padrao")
+        SUBCASE("construtor padrao")
         {
             PlaylistFixture p;
             CHECK(p.getTitulo() == "");
@@ -50,7 +50,7 @@ TEST_SUITE("Unit Tests - Entity: Playlist")
             CHECK_THROWS_AS(p.getSongAt(), std::out_of_range);
         }
 
-        SUBCASE(" construtor com id e título")
+        SUBCASE("construtor com id e título")
         {
             unsigned testId = 123;
             std::string Title = "titulo da playlist";
