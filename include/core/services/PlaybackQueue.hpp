@@ -218,6 +218,8 @@ public:
     * @return String representando a fila
     */
     std::string toString() const;
+
+    void setLoop(bool loop);
 };
 
 } // namespace core

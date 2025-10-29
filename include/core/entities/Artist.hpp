@@ -139,6 +139,14 @@ public:
    */
   void addAlbum(const Album &album);
 
+  virtual bool switchSong(unsigned id, unsigned index);
+
+  const IPlayable *findSongByTitle(const std::string &title);
+
+  const IPlayable *findSongById(unsigned songId);
+
+  int calculateTotalDuration();
+
   /**
    * @brief Remove uma música do artista
    * @param songId ID da música a ser removida
@@ -196,6 +204,9 @@ public:
    * @return true se possui pelo menos um álbum, false caso contrário
    */
   bool hasAlbum() const;
+
+  std::vector<std::shared_ptr<IPlayableObject>> getPlayableObjects() const;
+
   // Métodos Entity
 
   /**

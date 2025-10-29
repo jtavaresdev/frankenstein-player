@@ -211,6 +211,8 @@ public:
    */
   std::vector<std::shared_ptr<IPlayableObject>> getPlayableObjects() const;
 
+  std::string getAudioFilePath() const;
+
   // Métodos Entity
 
   /**

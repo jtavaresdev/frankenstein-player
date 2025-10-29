@@ -97,6 +97,8 @@ namespace core {
          * @return Número de reproduções da música pelo usuário
         */
         unsigned countPlaybacksByUserAndSong(const Song& song) const;
+
+
     };
 
 }

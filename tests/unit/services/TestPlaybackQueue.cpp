@@ -7,12 +7,12 @@
 
 #include <doctest/doctest.h>
 
-#include "core/include/core/entities/Playlist.hpp"
-#include "core/include/core/entities/Song.hpp"
-#include "core/include/core/entities/User.hpp"
-#include "core/include/core/interfaces/IPlayable.hpp"
-#include "core/include/core/services/PlaybackQueue.hpp"
-#include "fixture/PlaybackQueueFixture.hpp"
+#include "core/entities/Playlist.hpp"
+#include "core/entities/Song.hpp"
+#include "core/entities/User.hpp"
+#include "core/interfaces/IPlayable.hpp"
+#include "core/services/PlaybackQueue.hpp"
+#include "fixtures/PlaybackTestFixture.hpp"
 #include "mocks/MockPlayable.hpp"
 
 #include <memory>
@@ -21,7 +21,7 @@
 // CONSTRUTORES
 TEST_CASE_FIXTURE(PlaybackQueueFixture,
                   "PlaybackQueue - Construtor sem músicas cria fila vazia") {
-  auto queue(user, history_repo);
+  core::PlaybackQueue queue(user, history_repo);
 
   CHECK(queue.empty());
   CHECK(queue.size() == 0);

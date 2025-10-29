@@ -1,12 +1,14 @@
+#include "core/entities/User.hpp"
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include "core/services/UsersManager.hpp"
+#include "core/bd/RepositoryFactory.hpp"
 
 #include "fixtures/ConfigFixture.hpp"
 #include "fixtures/MediaFixture.hpp"
 #include "fixtures/DatabaseFixture.hpp"
-#include "fixtures/UserFixure.hpp"
+#include "fixtures/UserFixture.hpp"
 
 #include "core/bd/UserRepository.hpp"
 
@@ -14,13 +16,13 @@
 TEST_SUITE("HISTÓRIA DE USUÁRIO: Segurança e gestão de usuário") {
     ConfigFixture config = ConfigFixture();
     MediaFixture media = MediaFixture();
-    UserFixture fixture = UserFixture();
+    UserFixture user_fixture = UserFixture();
     core::RepositoryFactory repo_factory(DatabaseFixture().getDatabase());
 
     std::unique_ptr<core::UserRepository> user_repo = repo_factory.createUserRepository();
 
 
-    core::UserManager userManager(config);
+    core::UsersManager userManager(config);
 
     TEST_CASE("Gerenciar usuários") {
 
@@ -38,14 +40,14 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Segurança e gestão de usuário") {
         );
         user_repo->save(user);
 
-        std::shared_ptr<User> user_ptr = getUserByUserId(admin_data.id);
-        
+        std::shared_ptr<core::User> user_ptr = userManager.getUserByUserId(admin_data.id);
+
         CHECK(user_ptr != nullptr);
         CHECK(user_ptr->getUsername() == admin_data.username);
         CHECK(user_ptr->getUID() == admin_data.uid);
         CHECK(user_repo->count() == 1);
 
-        core::User user(
+        user = core::User(
             empty_data.username,
             empty_data.home_path,
             empty_data.input_path,
@@ -53,27 +55,25 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Segurança e gestão de usuário") {
         );
         user_repo->save(user);
 
-        std::shared_ptr<User> user_ptr = getUserByUserId(empty_data.id);
-        
+        user_ptr = userManager.getUserByUserId(empty_data.id);
+
         CHECK(user_ptr != nullptr);
         CHECK(user_ptr->getInputPath() == empty_data.username);
         CHECK(user_ptr->getHomePath() == empty_data.home_path);
         CHECK(user_repo->count() == 2);
 
-        core::User user(
+        user = core::User(
             normal_data.username,
             normal_data.home_path,
             normal_data.input_path,
             normal_data.uid
         );
 
-        std::vector<User> vector = user_repo->getAllUsers();
-        CHECK(vector != nullptr);
+        auto vector = user_repo->getAll();
         CHECK(vector.size() == 3);
-        user_repo->removeUser(empty_data.id);
+        user_repo->remove(empty_data.id);
 
-        vector = user_repo->getAllUsers();
-        CHECK(vecctor != nullptr);
+        vector = user_repo->getAll();
         CHECK(vector.size() == 2);
     }
 

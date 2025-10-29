@@ -32,13 +32,6 @@ namespace core {
         std::shared_ptr<SQLite::Database> _db;
         std::string _table_name;
 
-        SQLiteRepositoryBase(
-            std::shared_ptr<SQLite::Database> db,
-            const std::string& table_name
-        ) : _db(db), _table_name(table_name) {}
-
-        virtual ~SQLiteRepositoryBase() = default;
-
         /**
          * @brief Prepara uma declaração SQL
          * @copydoc IRepository::prepare
@@ -67,6 +60,22 @@ namespace core {
         const std::string& getTableName() const;
 
     public:
+        SQLiteRepositoryBase(
+            std::shared_ptr<SQLite::Database> db,
+            const std::string& table_name
+        ) : _db(db), _table_name(table_name) {}
+
+        virtual ~SQLiteRepositoryBase() = default;
+
+        /**
+         * @bief Busca uma entidade pelo ID
+         * @copydoc IRepository::findById
+         * @param id ID da entidade a ser buscada
+         * @return Ponteiro compartilhado para a entidade encontrada, ou nullptr se não encontrada
+         */
+        std::shared_ptr<T> findById(unsigned id) const override;
+
+
         /**
          * @brief Obtém o ID da última inserção
          * @copydoc IRepository::getLastInsertId
@@ -88,6 +97,12 @@ namespace core {
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
         bool removeAll() override;
+
+        /**
+         * @brief Obtém o número total de entidades no repositório
+         * @return Quantidade de entidades
+         */
+        virtual size_t count() const;
     };
 
 }

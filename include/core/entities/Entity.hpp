@@ -55,13 +55,13 @@ public:
    * @param other Entidade a ser comparada
    * @return true se as entidades forem iguais, false caso contrário
    */
-  virtual bool operator==(const Entity &other) const = 0;
+  virtual bool operator==(const Entity &other) const;
 
   /**
    * @brief Compara duas entidades para desigualdade
    * @param other Entidade a ser comparada
    * @return true se as entidades forem diferentes, false caso contrário
    */
-  virtual bool operator!=(const Entity &other) const = 0;
+  virtual bool operator!=(const Entity &other) const;
 };
 } // namespace core

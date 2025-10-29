@@ -11,7 +11,7 @@
 
 #include "fixtures/ConfigFixture.hpp"
 
-TEST_SUIT("Unit Tests - SongRepository") {
+TEST_SUITE("Unit Tests - core::SongRepository") {
     std::unique_ptr<core::DatabaseManager> createTempDB() {
         ConfigFixture config;
         std::string db_path = config.databasePath();
@@ -21,13 +21,13 @@ TEST_SUIT("Unit Tests - SongRepository") {
     }
 
     TEST_CASE("SongRepository: Inserir e remover") {
-        core::SongRepository repo(createTempDB());
+        core::SongRepository repo(createTempDB()->getDatabase());
 
-        core::Song song1 = Song(1, "media/test/music1.mp3", "Música teste 1", "Artista1");
-        core::Song song2 = Song(2, "media/test/music2.mp3", "Minha Música", "Artista1");
-        core::Song song3 = Song(3, "media/test/music3.mp3", "Música teste 2", "Artista2");
+        core::Song song1 = core::Song(1, "media/test/music1.mp3", "Música teste 1", "Artista1");
+        core::Song song2 = core::Song(2, "media/test/music2.mp3", "Minha Música", "Artista1");
+        core::Song song3 = core::Song(3, "media/test/music3.mp3", "Música teste 2", "Artista2");
 
-        CHECK(repo.count == 0);
+        CHECK(repo.count() == 0);
         CHECK(repo.save(song1) == true);
         CHECK(repo.count() == 1);
 
@@ -35,23 +35,23 @@ TEST_SUIT("Unit Tests - SongRepository") {
         CHECK(repo.count() == 2);
 
         CHECK(repo.remove(3) == false);
-        CHECK(repo.count() == 2)
+        CHECK(repo.count() == 2);
         CHECK(repo.remove(2) == true);
         CHECK(repo.count() == 1);
     }
 
     TEST_CASE("SongRepository: Buscar") {
-        core::SongRepository repo(createTempDB());
+        core::SongRepository repo(createTempDB()->getDatabase());
 
-        core::Song song1 = Song(1, "media/test/music1.mp3", "Música teste 1", "Artista1");
-        core::Song song2 = Song(2, "media/test/music2.mp3", "Minha Música", "Artista1");
-        core::Song song3 = Song(3, "media/test/music3.mp3", "Música teste 2", "Artista2");
+        core::Song song1 = core::Song(1, "media/test/music1.mp3", "Música teste 1", "Artista1");
+        core::Song song2 = core::Song(2, "media/test/music2.mp3", "Minha Música", "Artista1");
+        core::Song song3 = core::Song(3, "media/test/music3.mp3", "Música teste 2", "Artista2");
 
-        CHECK(repo.count == 0);
+        CHECK(repo.count() == 0);
         CHECK(repo.save(song1) == true);
         CHECK(repo.save(song2) == true);
 
-        std::shared_ptr<Song> ptr = repo.findById(2);
+        std::shared_ptr<core::Song> ptr = repo.findById(2);
         CHECK(ptr != nullptr);
         CHECK(ptr->getTitle() == "Minha Música");
         CHECK(ptr->getArtist() != nullptr);
@@ -64,25 +64,24 @@ TEST_SUIT("Unit Tests - SongRepository") {
     }
 
     TEST_CASE("SongRepository: Get All") {
-        core::SongRepository repo(createTempDB());
+        core::SongRepository repo(createTempDB()->getDatabase());
 
-        core::Song song1 = Song(1, "media/test/music1.mp3", "Música teste 1", "Artista1");
-        core::Song song2 = Song(2, "media/test/music2.mp3", "Minha Música", "Artista1");
-        core::Song song3 = Song(3, "media/test/music3.mp3", "Música teste 2", "Artista2");
+        core::Song song1 = core::Song(1, "media/test/music1.mp3", "Música teste 1", "Artista1");
+        core::Song song2 = core::Song(2, "media/test/music2.mp3", "Minha Música", "Artista1");
+        core::Song song3 = core::Song(3, "media/test/music3.mp3", "Música teste 2", "Artista2");
 
         CHECK(repo.save(song1) == true);
         CHECK(repo.save(song2) == true);
 
-        std::vector<std::shared_ptr<Song>> vector = repo.getAll();
-        CHECK(vector != nullptr);
+        std::vector<std::shared_ptr<core::Song>> vector = repo.getAll();
         CHECK(vector.size() == 2);
-        CHECK(vector.end()->getTitle() == "Minha Música");
+        CHECK(vector.end()->get()->getTitle() == "Minha Música");
 
         CHECK(repo.save(song3) == true);
-        std::vector<std::shared_ptr<Song>> vector = repo.getAll();
+        vector = repo.getAll();
         CHECK(vector.size() == 3);
-        CHECK(vector.end()->getTitle() == "Música teste 2");
-        CHECK(vector.begin()->getTitle() == "Música teste 1");
+        CHECK(vector.end()->get()->getTitle() == "Música teste 2");
+        CHECK(vector.begin()->get()->getTitle() == "Música teste 1");
 
     }
 }

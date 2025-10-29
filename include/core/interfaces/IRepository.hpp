@@ -44,6 +44,17 @@ namespace core {
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
         virtual bool update(const T &entity) = 0;
+
+        /**
+         * @brief Busca entidades por um campo específico
+         * @param field Nome do campo a ser filtrado
+         * @param value Valor do campo para filtro
+         * @return Vetor contendo as entidades que correspondem ao critério
+         */
+        virtual std::vector<std::shared_ptr<T>> findBy(
+            const std::string& field,
+            const std::string& value
+        ) const = 0;
     public:
         virtual ~IRepository() = default;
 
@@ -73,17 +84,6 @@ namespace core {
          * @return Vetor contendo todas as entidades
          */
         virtual std::vector<std::shared_ptr<T>> getAll() const = 0;
-
-        /**
-         * @brief Busca entidades por um campo específico
-         * @param field Nome do campo a ser filtrado
-         * @param value Valor do campo para filtro
-         * @return Vetor contendo as entidades que correspondem ao critério
-         */
-        virtual std::vector<std::shared_ptr<T>> findBy(
-            const std::string& field,
-            const std::string& value
-        ) const = 0;
 
         /**
          * @brief Verifica se uma entidade existe no repositório

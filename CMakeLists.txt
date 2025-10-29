@@ -176,6 +176,15 @@ endif()
 # CONFIGURAÇÕES DE COMPILAÇÃO
 # ============================================================================
 
+if(BUILD_TESTING)
+    # Adiciona flags de cobertura para GCC/Clang
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        set(COVERAGE_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COVERAGE_FLAGS}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${COVERAGE_FLAGS}")
+    endif()
+endif()
+
 # Avisos rigorosos
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(frankenstein_core PRIVATE -Wall -Wextra -Wpedantic)

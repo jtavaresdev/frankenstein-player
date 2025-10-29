@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/include/core/entities/Song.hpp"
-#include "core/include/core/interfaces/IPlayable.hpp"
-#include "core/include/core/interfaces/IPlayableObject.hpp"
+#include "core/entities/Song.hpp"
+#include "core/interfaces/IPlayable.hpp"
+#include "core/interfaces/IPlayableObject.hpp"
 #include <memory>
 #include <vector>
 

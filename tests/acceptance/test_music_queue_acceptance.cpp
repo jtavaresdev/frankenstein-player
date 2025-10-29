@@ -2,10 +2,11 @@
 #include <doctest/doctest.h>
 
 #include "core/bd/HistoryPlaybackRepository.hpp"
-#include "core/include/core/entities/Song.hpp"
-#include "core/include/core/entities/User.hpp"
-#include "core/include/core/services/PlaybackQueue.hpp"
+#include "core/entities/Song.hpp"
+#include "core/entities/User.hpp"
+#include "core/services/PlaybackQueue.hpp"
 #include "mocks/MockPlayable.hpp"
+#include "fixtures/DatabaseFixture.hpp"
 
 #include <memory>
 #include <vector>
@@ -13,7 +14,7 @@
 TEST_CASE("ACEITAÇÃO: Usuário ouvindo e editando fila de músicas") {
 
   auto user = std::make_shared<core::User>("usuario_teste");
-  auto history_repo = std::make_shared<core::HistoryPlaybackRepository>();
+  auto history_repo = std::make_shared<core::HistoryPlaybackRepository>(DatabaseFixture().getDatabase());
 
   std::vector<std::shared_ptr<core::Song>> musicas;
   for (int i = 1; i <= 5; i++) {

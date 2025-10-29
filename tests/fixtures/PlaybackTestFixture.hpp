@@ -3,6 +3,7 @@
 #include "core/bd/HistoryPlaybackRepository.hpp"
 #include "core/entities/Song.hpp"
 #include "core/entities/User.hpp"
+#include "fixtures/DatabaseFixture.hpp"
 #include <memory>
 
 /**
@@ -15,7 +16,7 @@ public:
 
   PlaybackQueueFixture() {
     user = std::make_shared<core::User>("username");
-    history_repo = std::make_shared<core::HistoryPlaybackRepository>();
+    history_repo = std::make_shared<core::HistoryPlaybackRepository>(DatabaseFixture().getDatabase());
   };
 
   std::shared_ptr<core::Song> createSong(const std::string &title) {

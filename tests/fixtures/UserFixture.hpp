@@ -5,23 +5,24 @@
 #include <memory>
 #include <boost/filesystem.hpp>
 
-class UserFixure {
+#include "core/entities/User.hpp"
+
+class UserFixture {
     public:
         struct UserTestMock {
             unsigned int id;
             std::string username;
             std::string home_path;
             std::string input_path;
-            userid uid;
+            core::userid uid;
             bool is_current_user;
         };
 
-    private:
         std::string _base_test_path;
         std::map<std::string, UserTestMock> _test_user_mocks;
 
         UserFixture(){
-            _base_test_path = (boost::filesystem::current_path() / "tests" / "temp_user_data").string();            
+            _base_test_path = (boost::filesystem::current_path() / "tests" / "temp_user_data").string();
             _test_user_mocks["ADMIN_USER"] = UserTestMock{
                 1,
                 "admin_test",
@@ -57,4 +58,4 @@ class UserFixure {
     const std::string getBaseTestPath() const {
         return _base_test_path;
     }
-}
+};

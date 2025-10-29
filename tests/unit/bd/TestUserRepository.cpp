@@ -21,7 +21,7 @@ TEST_SUITE("Unit Tests - UserRepository") {
     }
 
     TEST_CASE("UserRepository: inserir e buscar usuário") {
-        core::UserRepository repo(createTempDB());
+        core::UserRepository repo(createTempDB()->getDatabase());
 
         core::User user("usuario1");
         user.setHomePath("/home/usuario1");
@@ -31,7 +31,7 @@ TEST_SUITE("Unit Tests - UserRepository") {
             user.setUID(101);
         #endif
 
-        CHECK(repo.insert(user) == true);
+        CHECK(repo.save(user) == true);
 
         auto all_users = repo.getAll();
         CHECK(all_users.size() == 1);
@@ -45,7 +45,7 @@ TEST_SUITE("Unit Tests - UserRepository") {
     }
 
     TEST_CASE("UserRepository: salvar (insert/update) usuário") {
-        core::UserRepository repo(createTempDB());
+        core::UserRepository repo(createTempDB()->getDatabase());
 
         core::User user("usuario2");
         user.setHomePath("/home/usuario2");
@@ -80,10 +80,10 @@ TEST_SUITE("Unit Tests - UserRepository") {
     }
 
     TEST_CASE("UserRepository: remover usuário") {
-        core::UserRepository repo(createTempDB());
+        core::UserRepository repo(createTempDB()->getDatabase());
 
         core::User user("usuario3");
-        CHECK(repo.insert(user) == true);
+        CHECK(repo.save(user) == true);
 
         auto all_users = repo.getAll();
         CHECK(all_users.size() == 1);
@@ -97,15 +97,15 @@ TEST_SUITE("Unit Tests - UserRepository") {
     }
 
     TEST_CASE("UserRepository: buscar por username") {
-        core::UserRepository repo(createTempDB());
+        core::UserRepository repo(createTempDB()->getDatabase());
 
         core::User user1("alice");
         core::User user2("bob");
         core::User user3("alice");
 
-        CHECK(repo.insert(user1) == true);
-        CHECK(repo.insert(user2) == true);
-        CHECK(repo.insert(user3) == true);
+        CHECK(repo.save(user1) == true);
+        CHECK(repo.save(user2) == true);
+        CHECK(repo.save(user3) == true);
 
         auto found_alice = repo.findByUsername("alice");
         CHECK(found_alice.size() == 2);
@@ -121,7 +121,7 @@ TEST_SUITE("Unit Tests - UserRepository") {
     }
 
     TEST_CASE("UserRepository: getAll retorna todos usuários") {
-        core::UserRepository repo(createTempDB());
+        core::UserRepository repo(createTempDB()->getDatabase());
 
         CHECK(repo.getAll().empty());
 
@@ -129,9 +129,9 @@ TEST_SUITE("Unit Tests - UserRepository") {
         core::User user2("u2");
         core::User user3("u3");
 
-        CHECK(repo.insert(user1) == true);
-        CHECK(repo.insert(user2) == true);
-        CHECK(repo.insert(user3) == true);
+        CHECK(repo.save(user1) == true);
+        CHECK(repo.save(user2) == true);
+        CHECK(repo.save(user3) == true);
 
         auto all_users = repo.getAll();
         CHECK(all_users.size() == 3);
@@ -146,10 +146,10 @@ TEST_SUITE("Unit Tests - UserRepository") {
     }
 
     TEST_CASE("UserRepository: findById retorna nullptr para inexistente") {
-        core::UserRepository repo(createTempDB());
+        core::UserRepository repo(createTempDB()->getDatabase());
 
-        auto user = repo.findById(9999);
-        CHECK(user == nullptr);
+        auto user1 = repo.findById(9999);
+        CHECK(user1 == nullptr);
 
         core::User user("usuario1");
         user.setHomePath("/home/usuario1");
@@ -160,7 +160,7 @@ TEST_SUITE("Unit Tests - UserRepository") {
         #endif
         user.setUID(user_id);
 
-        CHECK(repo.insert(user) == true);
+        CHECK(repo.save(user) == true);
 
         unsigned id = repo.getLastInsertId();
         auto found_user = repo.findById(id);
