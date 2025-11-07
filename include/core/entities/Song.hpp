@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 
+#include "SFML/Audio/SoundSource.hpp"
 #include "core/entities/Entity.hpp"
 #include "core/entities/User.hpp"
 #include "core/interfaces/IPlayable.hpp"
@@ -43,14 +44,17 @@ namespace core {
         std::string _file_path;
         std::string _title;
         unsigned _artist_id;
-        std::weak_ptr<Artist> _artist;
+        std::shared_ptr<Artist> _artist;
         std::vector<unsigned> _featuring_artists_ids;
         unsigned _album_id;
-        mutable std::weak_ptr<Album> _album;
+        mutable std::shared_ptr<Album> _album;
         int _duration;
         std::string _genre;
         int _year;
         bool _metadata_loaded;
+
+        std::vector<std::shared_ptr<User>>
+            _users;  // TODO logica de implementacao
 
         std::function<std::shared_ptr<Artist>()> artistLoader;
         std::function<std::vector<std::shared_ptr<Artist>>()>
@@ -67,12 +71,12 @@ namespace core {
          * @param id Identificador único da música
          * @param file_path Caminho do arquivo de áudio
          * @param title Título da música
-         * @param artist Artista/banda
+         * @param artist id artist
          */
-        Song(int id,
+        Song(unsigned id,
              const std::string& file_path,
              const std::string& title,
-             const std::string& artist);
+             unsigned& artist);
         /**
          * @brief Construtor da classe Song
          * @param id Identificador único da música
@@ -81,9 +85,12 @@ namespace core {
          * @param artist Artista/banda
          */
         Song(const std::string& title,
-             const Album& album,
-             const Artist& artist,
-             const User& user);
+             std::shared_ptr<Artist>& artist,
+             std::shared_ptr<Album>& album
+             // std::unique_ptr<User>& user); Acredito que pasar usuario aqui
+             // nao é bom pois é validado pelo usuario da maquina
+        );
+        ~Song();
 
         // Getters
         /**
@@ -106,7 +113,7 @@ namespace core {
          * @return Vetor de ponteiros compartilhados para os artistas
          * colaboradores
          */
-        std::vector<std::shared_ptr<const Artist>> getFeaturingArtists() const;
+        std::vector<std::shared_ptr<const Artist>> getFeaturingArtists();
         /**
          * @brief Obtém o álbum
          * @return Nome do álbum
@@ -147,7 +154,7 @@ namespace core {
          * @brief Define o artista principal
          * @param artist Novo artista
          */
-        void setArtist(const Artist& artist);
+        void setArtist(std::shared_ptr<Artist>& artist);
         /**
          * @brief Define a função para carregar o artista
          * @param loader Função que retorna um ponteiro compartilhado para o
@@ -181,11 +188,6 @@ namespace core {
          */
         void setAlbum(const Album& album);
         /**
-         * @brief Define a duração
-         * @param duration Nova duração em segundos
-         */
-        void setDuration(int duration);
-        /**
          * @brief Define o gênero
          * @param genre Novo gênero
          */
@@ -196,13 +198,15 @@ namespace core {
          */
         void setYear(int year);
         // Métodos
+
         /**
          * @brief Carrega metadados do arquivo de áudio
          * @return true se os metadados foram carregados com sucesso, false caso
          * contrário
          * @note Futuramente será implementado com a biblioteca TagLib
          */
-        bool loadMetadata();
+        // bool loadMetadata(); Nao sei se vamos usar realmente metadados no
+        // inicio
 
         /**
          * @brief Obtém a duração formatada
@@ -226,28 +230,27 @@ namespace core {
         std::vector<std::shared_ptr<IPlayableObject>>
         getPlayableObjects() const override;
 
-
-  // Métodos Entity
+        // Métodos Entity
 
         /**
          * @brief Compara dois Song
          * @param other Song a ser comparada
          * @return true se as entidades forem iguais, false caso contrário
          */
-        virtual bool operator==(const Entity& other) const override;
+        bool operator==(const Entity& other) const override;
 
         /**
          * @brief Compara duas Song para desigualdade
          * @param other Song a ser comparada
          * @return true se as entidades forem diferentes, false caso contrário
          */
-        virtual bool operator!=(const Entity& other) const override;
+        bool operator!=(const Entity& other) const override;
 
         /**
          * @brief Obtém o caminho do arquivo de áudio
          * @return Caminho do arquivo de áudio
          */
-        virtual std::string getAudioFilePath() const override;
+        std::string getAudioFilePath() const override;
 
     };  // namespace core
 }  // namespace core

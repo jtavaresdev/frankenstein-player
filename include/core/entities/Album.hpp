@@ -39,15 +39,17 @@ namespace core {
                   public ICollection,
                   public IPlayableObject {
     private:
+        unsigned _id;
+        std::string _file_path;
         std::string _name;
         unsigned _artist_id;
-        mutable std::weak_ptr<Artist> _artist;
+        mutable std::shared_ptr<Artist> _artist;
         mutable std::vector<unsigned> _featuring_artists_ids;
         mutable std::vector<std::shared_ptr<Song>> _songs;
         std::string _genre;
         int _year;
 
-        std::function<std::vector<std::shared_ptr<Song>>()> songsLoader;
+        std::function<std::vector<std::shared_ptr<IPlayable>>()> songsLoader;
         std::function<std::shared_ptr<Artist>()> artistLoader;
         std::function<std::vector<std::shared_ptr<Artist>>()>
             featuringArtistsLoader;
@@ -65,7 +67,7 @@ namespace core {
          * @param genre Gênero do álbum
          */
         Album(const std::string name,
-              const std::string artist,
+              std::shared_ptr<Artist> artist,
               const std::string genre);
 
         /**
@@ -78,7 +80,7 @@ namespace core {
          */
         Album(unsigned id,
               const std::string name,
-              const std::string artist,
+              std::shared_ptr<Artist> artist,
               const std::string genre,
               int year);
         /**
@@ -98,7 +100,7 @@ namespace core {
          * @brief Obtém o artista do álbum
          * @return Nome do artista/banda
          */
-        std::string getArtist() const;
+        std::shared_ptr<Artist> getArtist() const;
 
         /**
          * @brief Obtém os artistas colaboradores (featuring)
@@ -128,10 +130,17 @@ namespace core {
         // Setters
 
         /**
+         * @brief Define o caminho do album (se precisar dpeende da
+         * implementação)
+         * @param path
+         */
+        void setFilePath(std::string& path);
+
+        /**
          * @brief Define o artista do álbum
          * @param artist Novo nome do artista
          */
-        void setArtist(const std::string& artist);
+        void setArtist(const std::shared_ptr<Artist>& artist);
 
         /**
          * @brief Define os artistas colaboradores (featuring)
@@ -182,17 +191,17 @@ namespace core {
          * @param other Album a ser comparada
          * @return true se as entidades forem iguais, false caso contrário
          */
-        virtual bool operator==(const Entity& other) const override;
+        bool operator==(const Entity& other) const override;
 
         /**
          * @brief Compara dois Albums para desigualdade
          * @param other Album a ser comparada
          * @return true se as entidades forem diferentes, false caso contrário
          */
-        virtual bool operator!=(const Entity& other) const override;
+        bool operator!=(const Entity& other) const override;
 
         /**
-         * @brief Obtém os objetos reproduzíveis (a própria música)
+         * @brief Obtém os objetos reproduzíveis
          * @return Vetor contendo esta música como IPlayableObject
          */
         std::vector<std::shared_ptr<IPlayableObject>>
@@ -202,24 +211,100 @@ namespace core {
          * @brief Obtém o caminho do arquivo de áudio
          * @return Caminho do arquivo de áudio
          */
-        virtual std::string getAudioFilePath() const override;
+        std::string getAudioFilePath() const override;
 
+        /**
+         * @brief Obtém um vetor com todas as músicas do álbum
+         * @return Vetor de ponteiros compartilhados para IPlayable contendo
+         * todas as músicas
+         */
         std::vector<std::shared_ptr<IPlayable>> getSongs() override;
+
+        /**
+         * @brief Define a função de carregamento para as músicas do álbum
+         * @param loader Função que retorna um vetor de ponteiros compartilhados
+         * para IPlayable
+         */
         void setSongsLoader(
             const std::function<std::vector<std::shared_ptr<IPlayable>>()>&
                 loader) override;
+
+        /**
+         * @brief Adiciona uma música ao álbum
+         * @param song Ponteiro compartilhado para IPlayable representando a
+         * música a ser adicionada
+         */
         void addSong(std::shared_ptr<IPlayable> song) override;
+
+        /**
+         * @brief Move uma música para uma nova posição no álbum
+         * @param id ID da música a ser movida
+         * @param index Nova posição (índice) da música no álbum
+         * @return true se a operação foi bem-sucedida, false caso contrário
+         */
         bool switchSong(unsigned id, unsigned index) override;
+
+        /**
+         * @brief Remove uma música do álbum pelo ID
+         * @param id ID da música a ser removida
+         * @return true se a música foi encontrada e removida, false caso
+         * contrário
+         */
         bool removeSong(unsigned id) override;
+
+        /**
+         * @brief Busca uma música pelo ID
+         * @param songId ID da música a ser buscada
+         * @return Ponteiro compartilhado para IPlayable da música encontrada,
+         * ou nullptr se não encontrada
+         */
         std::shared_ptr<IPlayable> findSongById(unsigned songId) override;
+
+        /**
+         * @brief Busca uma música pelo título
+         * @param title Título da música a ser buscada
+         * @return Ponteiro compartilhado para IPlayable da música encontrada,
+         * ou nullptr se não encontrada
+         */
         std::shared_ptr<IPlayable>
         findSongByTitle(const std::string& title) override;
+
+        /**
+         * @brief Calcula a duração total do álbum
+         * @return Duração total em segundos
+         */
         int calculateTotalDuration() override;
+
+        /**
+         * @brief Obtém a duração formatada do álbum
+         * @return String com a duração no formato "HH:MM:SS"
+         */
         std::string getFormattedDuration() override;
+
+        /**
+         * @brief Obtém a próxima música em relação à música atual
+         * @param current Música atual como referência
+         * @return Ponteiro compartilhado para IPlayable da próxima música, ou
+         * nullptr se não houver próxima
+         */
         std::shared_ptr<IPlayable>
         getNextSong(std::shared_ptr<IPlayable> current) override;
+
+        /**
+         * @brief Obtém a música anterior em relação à música atual
+         * @param current Música atual como referência
+         * @return Ponteiro compartilhado para IPlayable da música anterior, ou
+         * nullptr se não houver anterior
+         */
         std::shared_ptr<IPlayable>
         getPreviousSong(std::shared_ptr<IPlayable> current) override;
+
+        /**
+         * @brief Obtém a música em uma posição específica do álbum
+         * @param index Índice da música no álbum
+         * @return Ponteiro compartilhado para IPlayable da música na posição
+         * especificada, ou nullptr se índice inválido
+         */
         std::shared_ptr<IPlayable> getSongAt(int index) override;
     };
 
