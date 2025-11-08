@@ -133,7 +133,6 @@ namespace core {
 
     std::vector<std::shared_ptr<IPlayable>> Album::getSongs() {
         std::vector<std::shared_ptr<IPlayable>> vector;
-        assert(!vector.empty());
 
         for (auto const& s : _songs) {
             vector.push_back(s);
@@ -186,7 +185,8 @@ namespace core {
                      + currentIndex);  // reorganiza vetor apos tirar
 
         if (index >= _songs.size()) {
-            _songs.push_back(songToMove);
+            _songs.push_back(songToMove);  // talvez usar end() aponta para
+                                           // posicao alem do vector
         } else {
             _songs.insert(_songs.begin() + index, songToMove);
         }
@@ -216,7 +216,7 @@ namespace core {
     std::shared_ptr<IPlayable>
     Album::findSongByTitle(const std::string& title) {
         for (auto const& s : _songs) {
-            if (s->getTitle() == title) {
+            if (s->getTitle().compare(title)) {
                 return s;
             }
         }
