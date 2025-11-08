@@ -25,16 +25,16 @@ namespace cli
     {
     private:
         std::shared_ptr<core::User> _user;
-        std::shared_ptr<Player> player;
+        std::shared_ptr<core::Player> player;
 
         /**
          * @brief toca um IPlayable ou um IPlayableObject
          *
          * @param playabel caminho para a música.
          */
-        void play(std::string &playabel);
+        void play(Core::IPlayable &playabel);
 
-                /**
+        /**
          * @brief recomeça a musica atual
          *
          */
@@ -122,6 +122,36 @@ namespace cli
          */
         void like();
 
+        /**
+         * @brief Retira a musica atual da playlist de músicas curtidas
+         *
+         */
+        void deslike();
+
+        /**
+         * @brief Mostra as informações atuais do player como: volume, minutagem da musica atual, prxima musica da lista, etc.
+         *
+         */
+        void showStatus() const;
+
+        /**
+         * @brief Mostra as informações da fila de musicas.
+         *
+         */
+        void showQueue() const;
+
+        /**
+         * @brief Adiociona uma música na fila.
+         * @param playabel Objeto IPlayable a ser adicionado a fil.
+         */
+        void addToQueue(Core::IPlayable &playabel);
+
+        /**
+         * @brief Remove uma música na fila.
+         * @param idx Index do objeto IPlayable a ser removido na fila.
+         */
+        void removeFromQueue(unsigned idx);
+
     public:
         /**
          * @brief Construtor de um novo objeto Cli
@@ -138,7 +168,7 @@ namespace cli
         ~Cli();
 
         /**
-         * @brief Recebe e realiza um comando específico
+         * @brief Recebe, trata e realiza uma string com o comando a ser realizado.
          *
          * @param command comando digitado e seus parâmetros
          * @return booleano representando se o comando foi realizado com sucesso
