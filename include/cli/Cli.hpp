@@ -14,6 +14,7 @@
 #include <memory>
 #include <sstream>
 #include <iostream>
+#include <optional>
 
 // #include "core/entities/EntitiesFWD.hpp" // TODO incluir user
 #include "core/services/ConfigManager.hpp"
@@ -28,6 +29,14 @@ namespace cli
   private:
     std::shared_ptr<core::User> _user;
     std::shared_ptr<core::Player> _player;
+
+    /**
+     * @brief resolve uma string para um IPlayable ou IPlayableObject
+     *
+     * @param str string a ser resolvida
+     * @return optional com o IPlayable ou IPlayableObject resolvido
+     */
+    std::optional<std::shared_ptr<Core::IPlayable>> resolvePlayable(const std::string &str);
 
     /**
      * @brief toca um IPlayable ou um IPlayableObject
@@ -89,7 +98,7 @@ namespace cli
      * @brief Define o nível de volume do player
      * @param volume Novo nível de volume entre 0.0 (mudo) e 1.0 (máximo)
      */
-    void setVolume(const std::string &volume);
+    void setVolume(unsigned int volume);
 
     /**
      * @brief aumenta/diminui o nível de volume do player por um valor específico
@@ -110,7 +119,7 @@ namespace cli
      * @brief Silencia o player
      *
      * muta ou desmuta o volume
-     * 
+     *
      * @param command "mute" para mutar, "unmute" para desmutar, "toggle_mute" para alternar entre os dois estados
      */
     void toggleMute(const std::string &command);
@@ -135,25 +144,44 @@ namespace cli
     void clearQueue();
 
     /**
-     * @brief Adiciona um IPlayable à playlist atual.
-     * @param playabel Objeto IPlayable a ser adicionado à playlist.
+     * @brief Mostra as informações da playlist.
+     *
+     * @param playlist Objeto IPlayable que representa a playlist a ser exibida.
      */
-    boll addToPlaylist(Core::IPlayable &playabel);
+    void showPlaylist(Core::IPlayable &playlist) const;
+
+    /**
+     * @brief Adiciona um IPlayable à playlist atual.
+     *
+     * @param playlist Objeto IPlayable que representa a playlist onde o IPlayable será adicionado.
+     * @param playabel Objeto IPlayable a ser adicionado à playlist.
+     *
+     * @return booleano indicando se a adição foi bem-sucedida
+     */
+    bool addToPlaylist(Core::IPlayable &playlist, Core::IPlayable &playabel);
 
     /**
      * @brief Remove um IPlayable da playlist atual.
+     *
+     * @param playlist Objeto IPlayable que representa a playlist de onde o IPlayable será removido.
      * @param playabel Objeto IPlayable a ser removido da playlist.
+     *
+     * @return booleano indicando se a remoção foi bem-sucedida
      */
-    boll removeFromPlaylist(Core::IPlayable &playabel);
+    bool removeFromPlaylist(Core::IPlayable &playlist, Core::IPlayable &playabel);
 
     /**
      * @brief Remove um IPlayable da playlist atual pelo índice.
+     *
+     * @param playlist Objeto IPlayable que representa a playlist de onde o IPlayable será removido.
      * @param idx Índice do objeto IPlayable a ser removido da playlist.
+     *
+     * @return booleano indicando se a remoção foi bem-sucedida
      */
-    boll removeFromPlaylist(unsigned idx);
+    bool removeFromPlaylist(Core::IPlayable &playlist, unsigned int idx);
 
     /**
-     * @brief Coloca a playlist atual no modo aleatório.
+     * @brief Coloca a fila atual no modo aleatório.
      *
      */
     void shuffle();
@@ -197,8 +225,6 @@ namespace cli
     /**
      * @brief ativa/desativa o looping na musica atual.
      *
-     * se estiver ativado, desativa. Se estiver desativado, ativa. 
-     * 
      * @param command "on" para ativar, "off" para desativar
      */
     void loop(const std::string &command);
@@ -238,7 +264,18 @@ namespace cli
      */
     void searchPodcast(const std::string &query) const;
 
+    /**
+     * @brief Mostra a ajuda com os comandos disponíveis.
+     *
+     */
     void showHelp() const;
+
+    /**
+     * @brief Mostra a ajuda de um comando específico.
+     *
+     * @param command Comando para o qual a ajuda será exibida.
+     */
+    void showHelp(const std::string &topic) const;
 
   public:
     /**
