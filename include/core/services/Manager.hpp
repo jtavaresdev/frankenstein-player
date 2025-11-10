@@ -32,6 +32,10 @@ namespace core {
 
     class Manager {
     private:
+        const ConfigManager& _config;
+        std::shared_ptr<SongRepository> _songRepo;
+        std::shared_ptr<ArtistRepository> _artistRepo;
+        std::shared_ptr<AlbumRepository> _albumRepo;
 
         /**
          * @brief Move um arquivo de um diretório para o outro
@@ -63,10 +67,16 @@ namespace core {
     public:
 
         /**
-         * @brief Construtor padrão
+         * @brief Construtor da classe Manager
          * @param config Instância da configuração do sistema
+         * @param songRepo Repositório de músicas
+         * @param artistRepo Repositório de artistas
+         * @param albumRepo Repositório de álbuns
          */
-        Manager(const ConfigManager& config);
+        Manager(const ConfigManager& config,
+                std::shared_ptr<SongRepository> songRepo,
+                std::shared_ptr<ArtistRepository> artistRepo,
+                std::shared_ptr<AlbumRepository> albumRepo);
 
         /***
          * @brief Atualiza toda a organização das músicas com base no diretório temporário
