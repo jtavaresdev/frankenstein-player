@@ -73,7 +73,7 @@ namespace core {
     };
 
     void Song::setTitle(const std::string& title) {
-        assert(title.empty());
+        assert(!title.empty());
         _title = title;
     };
 

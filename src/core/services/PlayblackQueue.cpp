@@ -39,6 +39,8 @@ namespace core {
         add(playable);
     }
 
+    PlaybackQueue::~PlaybackQueue() = default;
+
     size_t PlaybackQueue::getCurrentIndex() const {
         return _aleatory ? _indices_aleatory[_current] : _current;
     }

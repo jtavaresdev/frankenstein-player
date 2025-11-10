@@ -115,6 +115,7 @@ add_library(frankenstein_core STATIC
 # Configura includes
 target_include_directories(frankenstein_core PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${sfml_SOURCE_DIR}/include>
 )
 
 # Inclui taglib se estiver disponível via FetchContent
@@ -148,10 +149,14 @@ if(BUILD_TESTING AND (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang"))
     target_link_options(frankenstein_core PRIVATE ${COVERAGE_LINK_FLAGS})
 endif()
 
+# message(STATUS "+++++++++++=SFML_LIBRARIES: ${SFML_FOUND}")
+
+
 # Adiciona SFML se disponível
-if(SFML_FOUND AND TARGET SFML::audio)
+if(SFML_FOUND)
     message(STATUS "SFML encontrada. Habilitando suporte a áudio.")
-    target_link_libraries(frankenstein_core PUBLIC SFML::audio)
+    # target_link_libraries(frankenstein_core PUBLIC SFML::audio SFML::system)
+    target_link_libraries(frankenstein_core PUBLIC ${SFML_LIBRARIES})
     target_compile_definitions(frankenstein_core PUBLIC HAVE_SFML_AUDIO)
 endif()
 
@@ -199,10 +204,16 @@ if(BUILD_TESTING)
         add_executable(${test_target} tests/test_main.cpp  ${testfile})
         target_link_libraries(${test_target} PRIVATE frankenstein_core doctest)
 
+        if(SFML_FOUND)
+            # target_link_libraries(${test_target} PRIVATE SFML::audio SFML::system)
+            target_link_libraries(${test_target} PRIVATE ${SFML_LIBRARIES})
+        endif()
+
         target_include_directories(${test_target} PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tests>
+            &<BUILD_INTERFACE:${SFML_INCLUDE_DIR}>
         )
 
         if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

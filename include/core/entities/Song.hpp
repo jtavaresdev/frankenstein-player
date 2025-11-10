@@ -15,8 +15,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <SFML/Audio/SoundSource.hpp>
 
-#include "SFML/Audio/SoundSource.hpp"
 #include "core/entities/Entity.hpp"
 #include "core/entities/User.hpp"
 #include "core/interfaces/IPlayable.hpp"
@@ -85,8 +85,9 @@ namespace core {
          * @param artist Artista/banda
          */
         Song(const std::string& title,
-             std::shared_ptr<Artist>& artist,
-             std::shared_ptr<Album>& album
+             Artist& artist,
+             Album& album,
+             User& user
              // std::unique_ptr<User>& user); Acredito que pasar usuario aqui
              // nao é bom pois é validado pelo usuario da maquina
         );
