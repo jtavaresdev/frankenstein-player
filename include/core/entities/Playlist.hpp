@@ -10,10 +10,10 @@
 
 #pragma once
 
+#include <memory.h>
 #include <memory>
 #include <string>
 #include <vector>
-#include <memory.h>
 
 #include "core/entities/Entity.hpp"
 #include "core/entities/Song.hpp"
@@ -81,8 +81,8 @@ namespace core {
         virtual std::vector<std::shared_ptr<Song>> getSongs() const override;
 
         virtual void setSongsLoader(
-            const std::function<std::vector<std::shared_ptr<Song>>()>&
-                loader) override;
+            const std::function<std::vector<std::shared_ptr<Song>>()>& loader)
+            override;
 
         virtual void addSong(std::shared_ptr<IPlayable> song) override;
 
@@ -115,7 +115,6 @@ namespace core {
          */
         virtual std::vector<std::shared_ptr<IPlayableObject>>
         getPlayableObjects() const override;
-
 
         std::shared_ptr<User> getUser() const;
         void setUser(const User& user);

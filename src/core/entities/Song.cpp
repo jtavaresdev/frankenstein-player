@@ -13,6 +13,13 @@ namespace core {
     Song::Song() {};
 
     Song::Song(unsigned id,
+               std::string file_path,
+               std::string title,
+               unsigned artist_id)
+        : _id(id), _file_path(file_path), _title(title),
+          _artist_id(artist_id) {};
+
+    Song::Song(unsigned id,
                const std::string& title,
                unsigned& artist,
                unsigned& user_id)

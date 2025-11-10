@@ -65,6 +65,7 @@ namespace core {
          */
         Song();
 
+        // TODO DOCUMENTACAO
         Song(const std::string& title,
              std::shared_ptr<Artist>& artist,
              std::shared_ptr<Album>& album);
@@ -74,6 +75,10 @@ namespace core {
              std::string file_path,
              std::string title,
              unsigned artist_id);
+        // TODO DOCUMENTACAO
+        Song(const std::string& title,
+             std::shared_ptr<Artist>& artist,
+             std::shared_ptr<Album>& album);
 
         /**
          * @brief Construtor da classe Song
