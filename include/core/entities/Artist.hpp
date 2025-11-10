@@ -44,7 +44,7 @@ namespace core {
         std::string _genre;
         std::vector<std::shared_ptr<Song>> _songs;
         std::vector<std::shared_ptr<Album>> _albums;
-        std::shared_ptr<core::User> user;
+        std::shared_ptr<User> user;
 
         std::function<std::vector<std::shared_ptr<Song>>()> songsLoader;
         std::function<std::vector<std::shared_ptr<Album>>()> albumsLoader;
@@ -249,7 +249,7 @@ namespace core {
          * @return Vetor de ponteiros compartilhados para IPlayable contendo
          * todas as músicas
          */
-        std::vector<std::shared_ptr<IPlayable>> getSongs() override;
+        std::vector<std::shared_ptr<IPlayable>> getSongs();
 
         /**
          * @brief Obtém um vetor com todas as músicas do álbum de um Artista
@@ -261,7 +261,7 @@ namespace core {
 
         void setSongsLoader(
             const std::function<std::vector<std::shared_ptr<IPlayable>>()>&
-                loader) override;
+                loader);
 
         /**
          * @brief Adiciona uma música ao artista
