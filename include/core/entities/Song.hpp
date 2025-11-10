@@ -76,9 +76,6 @@ namespace core {
              std::string title,
              unsigned artist_id);
         // TODO DOCUMENTACAO
-        Song(const std::string& title,
-             std::shared_ptr<Artist>& artist,
-             std::shared_ptr<Album>& album);
 
         /**
          * @brief Construtor da classe Song
