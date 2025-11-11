@@ -51,13 +51,13 @@ namespace core {
 		if (index > _songs.size()) return false;
 
         std::vector<std::shared_ptr<Song>>::iterator it = _songs.begin();
-        while(it <= _songs.end()) {
+        while(it != _songs.end()) {
             if(it->get()->getId() == id) {
                 break;                
             }
         }
 		
-		if (it > _songs.end()) return false;
+		if (it == _songs.end()) return false;
 		auto node = *it;
 		_songs.erase(it);
 		if (index >= _songs.size()) {
@@ -70,35 +70,35 @@ namespace core {
 
 	bool Playlist::removeSong(unsigned id) {
 		std::vector<std::shared_ptr<Song>>::iterator it = _songs.begin();
-        while(it <= _songs.end()) {
+        while(it != _songs.end()) {
             if(it->get()->getId() == id) {
                 break;                
             }
         }
-		if (it > _songs.end()) return false;
+		if (it == _songs.end()) return false;
 		_songs.erase(it);
 		return true;
 	}
 
 	std::shared_ptr<Song> Playlist::findSongById(unsigned songId) {
 		std::vector<std::shared_ptr<Song>>::iterator it = _songs.begin();
-        while(it <= _songs.end()) {
+        while(it != _songs.end()) {
             if(it->get()->getId() == songId) {
                 break;                
             }
         }
-		if (it > _songs.end()) return nullptr;
+		if (it == _songs.end()) return nullptr;
 		return std::static_pointer_cast<Song>(*it);
 	}
 
 	std::shared_ptr<Song> Playlist::findSongByTitle(const std::string& title) {
 		std::vector<std::shared_ptr<Song>>::iterator it = _songs.begin();
-        while(it <= _songs.end()) {
+        while(it != _songs.end()) {
             if(it->get()->getTitle() == title) {
                 break;                
             }
         }
-		if (it > _songs.end()) return nullptr;
+		if (it == _songs.end()) return nullptr;
 		return std::static_pointer_cast<Song>(*it);
 	}
 
