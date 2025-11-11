@@ -101,6 +101,8 @@ target_include_directories(miniaudio_lib INTERFACE
 
 message(STATUS " MiniAudio configurado - suporte a MP3, WAV, OGG, FLAC")
 
+# 6. Boost Filesystem (find_package)
+find_package(Boost 1.65 COMPONENTS filesystem iostreams REQUIRED)
 # ============================================================================
 # BIBLIOTECA CORE
 # ============================================================================
