@@ -191,28 +191,6 @@ endif()
 
 target_link_libraries(frankenstein_player PRIVATE frankenstein_core)
 
-
-# ============================================================================
-# TESTE DE MÚSICA (ATUALIZADO PARA MINIAUDIO)
-# ============================================================================
-
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/testMusic.cpp)
-    add_executable(test_music src/testMusic.cpp)
-    
-    # Link DIRETO com MiniAudio e dependências do sistema
-    target_link_libraries(test_music PRIVATE 
-        miniaudio_lib
-        pthread m dl
-    )
-    
-    # Inclui tudo que precisa
-    target_include_directories(test_music PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-    )
-    
-    message(STATUS "Teste de música configurado com MiniAudio")
-endif()
-
 # ============================================================================
 # TESTES (apenas se BUILD_TESTING=ON)
 # ============================================================================
