@@ -212,6 +212,8 @@ namespace core {
     std::vector<std::shared_ptr<Artist>>
     SongRepository::getFeaturingArtists(const Song& song) const {
         // TODO
+        //
+        return {};
     };
 
     size_t SongRepository::count() const {

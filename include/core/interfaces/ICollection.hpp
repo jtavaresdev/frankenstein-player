@@ -24,7 +24,7 @@ namespace core {
             const std::function<std::vector<std::shared_ptr<Song>>()>&
                 loader) = 0;
 
-        virtual void addSong(std::shared_ptr<Song> song) = 0;
+        virtual void addSong(Song& song) = 0;
 
         virtual bool switchSong(unsigned id, unsigned index) = 0;
 
@@ -40,10 +40,10 @@ namespace core {
         virtual std::string getFormattedDuration() = 0;
 
         virtual std::shared_ptr<Song>
-        getNextSong(std::shared_ptr<Song> current) = 0;
+        getNextSong(Song& current) = 0;
 
         virtual std::shared_ptr<Song>
-        getPreviousSong(std::shared_ptr<Song> current) = 0;
+        getPreviousSong(Song& current) = 0;
 
         virtual std::shared_ptr<Song> getSongAt(int index) = 0;
     };

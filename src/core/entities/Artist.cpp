@@ -122,7 +122,7 @@ namespace core {
         return true;
     };
 
-    std::shared_ptr<IPlayable>
+    std::shared_ptr<Song>
     Artist::findSongByTitle(const std::string& title) {
         // todas musicas de um album devem estar em
         // _songs? iterar _songs : iterar _songs && _albums
@@ -135,7 +135,7 @@ namespace core {
         return nullptr;
     };
 
-    std::shared_ptr<IPlayable> Artist::findSongById(unsigned songId) {
+    std::shared_ptr<Song> Artist::findSongById(unsigned songId) {
         // todas musicas de um album devem estar em
         // _songs? iterar _songs : iterar _songs && _albums
 
@@ -269,13 +269,11 @@ namespace core {
         return songs;
     }
 
-    void Artist::addSong(std::shared_ptr<IPlayable> song) {
-        auto songPtr = std::dynamic_pointer_cast<Song>(song);
-        assert(songPtr != nullptr);
-        _songs.push_back(songPtr);
+    void Artist::addSong(Song &song) {
+        _songs.push_back(std::make_shared<Song>(song));
     };
 
-    void Artist::addSongAlbum(std::shared_ptr<IPlayable> song,
+    void Artist::addSongAlbum(Song &song,
                               unsigned idAlbum) {
         for (auto const& album : _albums) {
             if (album->getId() == idAlbum) {
@@ -305,10 +303,10 @@ namespace core {
         return false;
     };
 
-    std::shared_ptr<IPlayable>
-    Artist::getNextSong(std::shared_ptr<IPlayable> current) {
+    std::shared_ptr<Song>
+    Artist::getNextSong(Song &current) {
         for (size_t i = 0; i < _songs.size(); i++) {
-            if (_songs[i].get() == current.get()) {
+            if (*_songs[i] == current) {
 
                 if (i + 1 < _songs.size()) {
                     return _songs[i + 1];
@@ -320,10 +318,10 @@ namespace core {
         return nullptr;
     };
 
-    std::shared_ptr<IPlayable>
-    Artist::getPreviousSong(std::shared_ptr<IPlayable> current) {
+    std::shared_ptr<Song>
+    Artist::getPreviousSong(Song &current) {
         for (size_t i = 0; i < _songs.size(); i++) {
-            if (_songs[i].get() == current.get()) {
+            if (*_songs[i] == current) {
                 if (i > 0) {
                     return _songs[i - 1];
                 } else {
@@ -334,8 +332,8 @@ namespace core {
         return nullptr;
     };
 
-    std::shared_ptr<IPlayable>
-    Artist::getNextSongAlbum(std::shared_ptr<IPlayable> current,
+    std::shared_ptr<Song>
+    Artist::getNextSongAlbum(Song &current,
                              unsigned idAlbum) {
         for (auto const& album : _albums) {
             if (album->getId() == idAlbum) {
@@ -345,8 +343,8 @@ namespace core {
         return nullptr;
     }
 
-    std::shared_ptr<IPlayable>
-    Artist::getPreviousSongAlbum(std::shared_ptr<IPlayable> current,
+    std::shared_ptr<Song>
+    Artist::getPreviousSongAlbum(Song &current,
                                  unsigned idAlbum) {
 
         for (auto const& album : _albums) {
@@ -357,7 +355,7 @@ namespace core {
         return nullptr;
     };
 
-    std::shared_ptr<IPlayable> Artist::getSongAt(int index) {
+    std::shared_ptr<Song> Artist::getSongAt(int index) {
         return _songs.at(index);  // It throws out_of_range if n is out of
                                   // bounds. entao n precisa de exception
     };

@@ -42,9 +42,8 @@ namespace core {
 		}
 	}
 
-	void Playlist::addSong(std::shared_ptr<Song> song) {
-		if (!song) return;
-		_songs.push_back(song);
+	void Playlist::addSong(Song& song) {
+		_songs.push_back(std::make_shared<Song>(song));
 	}
 
 	bool Playlist::switchSong(unsigned id, unsigned index) {
@@ -53,10 +52,10 @@ namespace core {
         std::vector<std::shared_ptr<Song>>::iterator it = _songs.begin();
         while(it != _songs.end()) {
             if(it->get()->getId() == id) {
-                break;                
+                break;
             }
         }
-		
+
 		if (it == _songs.end()) return false;
 		auto node = *it;
 		_songs.erase(it);
@@ -72,7 +71,7 @@ namespace core {
 		std::vector<std::shared_ptr<Song>>::iterator it = _songs.begin();
         while(it != _songs.end()) {
             if(it->get()->getId() == id) {
-                break;                
+                break;
             }
         }
 		if (it == _songs.end()) return false;
@@ -84,7 +83,7 @@ namespace core {
 		std::vector<std::shared_ptr<Song>>::iterator it = _songs.begin();
         while(it != _songs.end()) {
             if(it->get()->getId() == songId) {
-                break;                
+                break;
             }
         }
 		if (it == _songs.end()) return nullptr;
@@ -95,7 +94,7 @@ namespace core {
 		std::vector<std::shared_ptr<Song>>::iterator it = _songs.begin();
         while(it != _songs.end()) {
             if(it->get()->getTitle() == title) {
-                break;                
+                break;
             }
         }
 		if (it == _songs.end()) return nullptr;
@@ -127,10 +126,8 @@ namespace core {
 		return ss.str();
 	}
 
-	std::shared_ptr<Song> Playlist::getNextSong(std::shared_ptr<Song> current) {
-		if (!current) return nullptr;
-		unsigned curId = 0;
-		if (current) curId = current->getId();
+	std::shared_ptr<Song> Playlist::getNextSong(Song &current) {
+		unsigned curId = current.getId();
 
 		for (size_t i = 0; i < _songs.size(); ++i) {
 			if (!_songs[i]) continue;
@@ -142,10 +139,8 @@ namespace core {
 		return nullptr;
 	}
 
-	std::shared_ptr<Song> Playlist::getPreviousSong(std::shared_ptr<Song> current) {
-		if (!current) return nullptr;
-		unsigned curId = 0;
-		if (current) curId = current->getId();
+	std::shared_ptr<Song> Playlist::getPreviousSong(Song &current) {
+		unsigned curId = current.getId();
 
 		for (size_t i = 0; i < _songs.size(); ++i) {
 			if (!_songs[i]) continue;

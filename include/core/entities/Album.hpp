@@ -51,7 +51,7 @@ namespace core {
         std::string _genre;
         int _year;
 
-        std::function<std::vector<std::shared_ptr<IPlayable>>()> songsLoader;
+        std::function<std::vector<std::shared_ptr<Song>>()> songsLoader;
         std::function<std::shared_ptr<Artist>()> artistLoader;
         std::function<std::vector<std::shared_ptr<Artist>>()>
             featuringArtistsLoader;
@@ -248,7 +248,7 @@ namespace core {
          * @param song Ponteiro compartilhado para IPlayable representando a
          * música a ser adicionada
          */
-        void addSong(std::shared_ptr<Song> song) override;
+        void addSong(Song& song) override;
 
         /**
          * @brief Move uma música para uma nova posição no álbum
@@ -302,7 +302,7 @@ namespace core {
          * nullptr se não houver próxima
          */
         std::shared_ptr<Song>
-        getNextSong(std::shared_ptr<Song> current) override;
+        getNextSong(Song& current) override;
 
         /**
          * @brief Obtém a música anterior em relação à música atual
@@ -311,7 +311,7 @@ namespace core {
          * nullptr se não houver anterior
          */
         std::shared_ptr<Song>
-        getPreviousSong(std::shared_ptr<Song> current) override;
+        getPreviousSong(Song& current) override;
 
         /**
          * @brief Obtém a música em uma posição específica do álbum

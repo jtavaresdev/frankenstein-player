@@ -268,7 +268,7 @@ namespace core {
          * @param song Ponteiro compartilhado para IPlayable representando a
          * música a ser adicionada
          */
-        void addSong(std::shared_ptr<Song> song) override;
+        void addSong(Song& song) override;
 
         /**
          * @brief Adiciona uma música a algum album
@@ -276,7 +276,7 @@ namespace core {
          * @param idAlbum unsigned com id do album
          * música a ser adicionada
          */
-        void addSongAlbum(std::shared_ptr<IPlayable> song, unsigned idAlbum);
+        void addSongAlbum(Song &song, unsigned idAlbum);
         /**
          * @brief Remove uma música do artista pelo ID
          * @param id ID da música a ser removida
@@ -300,7 +300,7 @@ namespace core {
          * nullptr se não houver próxima
          */
         std::shared_ptr<Song>
-        getNextSong(std::shared_ptr<Song> current) override;
+        getNextSong(Song &current) override;
 
         /**
          * @brief Obtém a música anterios em relação à música atual
@@ -309,7 +309,7 @@ namespace core {
          * nullptr se não houver próxima
          */
         std::shared_ptr<Song>
-        getPreviousSong(std::shared_ptr<Song> current) override;
+        getPreviousSong(Song &current) override;
 
         /**
          * @brief Obtém a próxima música em relação à música atual do album
@@ -318,8 +318,8 @@ namespace core {
          * @return Ponteiro compartilhado para IPlayable da próxima música, ou
          * nullptr se não houver próxima
          */
-        std::shared_ptr<IPlayable>
-        getNextSongAlbum(std::shared_ptr<IPlayable> current, unsigned idAlbum);
+        std::shared_ptr<Song>
+        getNextSongAlbum(Song &current, unsigned idAlbum);
 
         /**
          * @brief Obtém a música anterios em relação à música atual do album
@@ -328,8 +328,8 @@ namespace core {
          * @return Ponteiro compartilhado para IPlayable da próxima música, ou
          * nullptr se não houver próxima
          */
-        std::shared_ptr<IPlayable>
-        getPreviousSongAlbum(std::shared_ptr<IPlayable> current, unsigned idAlbum);
+        std::shared_ptr<Song>
+        getPreviousSongAlbum(Song &current, unsigned idAlbum);
         /**
          * @brief Obtém a música em uma posição específica de songs
          * @param index Índice da música em songs

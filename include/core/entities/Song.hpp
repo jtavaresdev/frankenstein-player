@@ -44,6 +44,7 @@ namespace core {
         std::string _title;
         unsigned _artist_id;
         unsigned _user_id;
+        // User _user;
         std::shared_ptr<Artist> _artist;
         std::vector<unsigned> _featuring_artists_ids;
         unsigned _album_id;

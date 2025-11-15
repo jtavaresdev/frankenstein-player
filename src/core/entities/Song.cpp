@@ -172,6 +172,8 @@ namespace core {
     };
 
     std::string Song::getAudioFilePath() const {
-        return _file_path;
+        // return _user->getBasePath() + "/" + getArtist()->getName() + "/" +
+        //        getAlbum()->getName() + "/" + getTitle() + ".mp3";
+        return "";
     };
 } // namespace core

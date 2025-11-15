@@ -85,7 +85,7 @@ namespace core {
             const std::function<std::vector<std::shared_ptr<Song>>()>& loader)
             override;
 
-        virtual void addSong(std::shared_ptr<Song> song) override;
+        virtual void addSong(Song& song) override;
 
         virtual bool switchSong(unsigned id, unsigned index) override;
 
@@ -102,10 +102,10 @@ namespace core {
         virtual std::string getFormattedDuration() override;
 
         virtual std::shared_ptr<Song>
-        getNextSong(std::shared_ptr<Song> current) override;
+        getNextSong(Song &current) override;
 
         virtual std::shared_ptr<Song>
-        getPreviousSong(std::shared_ptr<Song> current) override;
+        getPreviousSong(Song &current) override;
 
         virtual std::shared_ptr<Song> getSongAt(int index) override;
 

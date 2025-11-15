@@ -146,8 +146,8 @@ namespace core {
         return _file_path;
     };
 
-    std::vector<std::shared_ptr<IPlayable>> Album::getSongs() {
-        std::vector<std::shared_ptr<IPlayable>> vector;
+    std::vector<std::shared_ptr<Song>> Album::getSongs() const {
+        std::vector<std::shared_ptr<Song>> vector;
 
         for (auto const& s : _songs) {
             vector.push_back(s);
@@ -156,19 +156,15 @@ namespace core {
     }
 
     void Album::setSongsLoader(
-        const std::function<std::vector<std::shared_ptr<IPlayable>>()>&
+        const std::function<std::vector<std::shared_ptr<Song>>()>&
             loader) {
         songsLoader = loader;  // TODO alterei songsLoader para IPlayable para
                                // evitar esse cast que seria gambiarra
                                // se precisar faço a gambiarra
     };
 
-    void Album::addSong(std::shared_ptr<IPlayable> song) {
-
-        auto songPtr = std::dynamic_pointer_cast<Song>(song);
-        assert(songPtr != nullptr);
-
-        _songs.push_back(songPtr);
+    void Album::addSong(Song& song) {
+        _songs.push_back(std::make_shared<Song>(song));
     };
 
     bool Album::switchSong(unsigned id, unsigned index) {
@@ -219,7 +215,7 @@ namespace core {
         return false;
     };
 
-    std::shared_ptr<IPlayable> Album::findSongById(unsigned songId) {
+    std::shared_ptr<Song> Album::findSongById(unsigned songId) {
         for (const auto& song : _songs) {
             if (song && song->getId() == songId) {
                 return song;
@@ -228,7 +224,7 @@ namespace core {
         return nullptr;
     }
 
-    std::shared_ptr<IPlayable>
+    std::shared_ptr<Song>
     Album::findSongByTitle(const std::string& title) {
         for (auto const& s : _songs) {
             if (s->getTitle().compare(title)) {
@@ -265,11 +261,11 @@ namespace core {
 
         return formatted;
     };
-    std::shared_ptr<IPlayable>
-    Album::getNextSong(std::shared_ptr<IPlayable> current) {
+    std::shared_ptr<Song>
+    Album::getNextSong(Song &current) {
         for (size_t i = 0; i < _songs.size(); i++) {
 
-            if (_songs[i].get() == current.get()) {
+            if (*_songs[i] == current) {
 
                 if (i + 1 < _songs.size()) {
                     return _songs[i + 1];
@@ -281,10 +277,10 @@ namespace core {
         return nullptr;
     }
 
-    std::shared_ptr<IPlayable>
-    Album::getPreviousSong(std::shared_ptr<IPlayable> current) {
+    std::shared_ptr<Song>
+    Album::getPreviousSong(Song &current) {
         for (size_t i = 0; i < _songs.size(); i++) {
-            if (_songs[i].get() == current.get()) {
+            if (*_songs[i] == current) {
                 if (i > 0) {
                     return _songs[i - 1];
                 } else {
@@ -295,23 +291,8 @@ namespace core {
         return nullptr;
     };
 
-    std::shared_ptr<IPlayable> Album::getSongAt(int index) {
+    std::shared_ptr<Song> Album::getSongAt(int index) {
         return _songs.at(index);  // It throws out_of_range if n is out of
                                   // bounds. entao n precisa de exception
     };
-
-    std::vector<std::shared_ptr<Song>> Album::getSongs() const {
-        // Implementação: converter _songs ou carregar via loader
-        std::vector<std::shared_ptr<Song>> songs;
-        for (auto& song : _songs) {
-            songs.push_back(song);
-        }
-        return songs;
-    }
-
-    void Album::setSongsLoader(
-        const std::function<std::vector<std::shared_ptr<Song>>()>& loader) {
-        // TODO conflito no ICollection
-    }
-
 }  // namespace core
