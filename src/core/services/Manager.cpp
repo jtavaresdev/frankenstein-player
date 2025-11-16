@@ -48,7 +48,7 @@ namespace core
         }
         song->setArtist(artist);
 
-        std::string albumTitle = tag->album().isEmpty() ? "Unknown Album" : tag->album().toCString();
+        std::string albumTitle = tag->album().isEmpty() ? "Singles" : tag->album().toCString();
         std::vector<std::shared_ptr<Album>> albums = _albumRepo->findByArtist(artistName);
         std::shared_ptr<Album> album;
 

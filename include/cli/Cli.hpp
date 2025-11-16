@@ -137,6 +137,8 @@ namespace cli
          */
         ~Cli();
 
+        void start();
+
         /**
          * @brief Recebe e realiza um comando específico
          *
