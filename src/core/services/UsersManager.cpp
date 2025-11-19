@@ -96,9 +96,9 @@ namespace core {
                 for (i = 0; i < dwEntriesRead; i++, pTmpBuf++) {
                     if (pTmpBuf == NULL) break;
 
-                    
+
                     std::wstring wusername(pTmpBuf->usri0_name);
-                    std::string username(wusername.begin(), wusername.end());   
+                    std::string username(wusername.begin(), wusername.end());
                     std::string home_path = _configManager->userMusicDirectory();
                     std::string input_path = _configManager->inputUserPath();
                     std::string uid = "";
@@ -167,9 +167,7 @@ namespace core {
             public_user.setUID(0);
 
             if (!_userRepository->save(public_user)) {
-                assert (false &&
-                       "Erro ao criar o usuário público no banco de dados.");
-                // TODO exception
+
                 throw std::runtime_error(
                     "Erro ao criar o usuário público no banco de dados.");
             }
@@ -189,8 +187,6 @@ namespace core {
         if (users != nullptr && users->getUsername() == "public")
             return true;
         else if (users != nullptr && users->getUsername() != "public") {
-            assert (false && "ID 1 no banco de dados não corresponde ao usuário público.");
-            // TODO exception
             throw std::runtime_error("ID 1 no banco de dados não corresponde ao usuário público.");
             return false;
         }
@@ -208,8 +204,6 @@ namespace core {
                 if (_userRepository->remove(it->getId())) {
                     _users.erase(it);
                 } else {
-                    assert (false && "Erro ao remover o usuário do banco de dados.");
-                    // TODO exception
                     throw std::runtime_error("Erro ao remover o usuário do banco de dados.");
                 }
                 return;
@@ -245,8 +239,6 @@ namespace core {
                 stored_user->setInputPath(_configManager->inputUserPath());
 
                 if (!_userRepository->save(*stored_user)) {
-                    assert (false && "Erro ao atualizar o usuário no banco de dados.");
-                    // TODO exception
                     throw std::runtime_error("Erro ao atualizar o usuário no banco de dados.");
                 }
 
@@ -257,8 +249,6 @@ namespace core {
                 if (_userRepository->save(*os_user)) {
                     _users.push_back(*os_user);
                 } else {
-                    assert (false && "Erro ao salvar o usuário no banco de dados.");
-                    // TODO exception
                     throw std::runtime_error("Erro ao salvar o usuário no banco de dados.");
                 }
             }
@@ -304,8 +294,6 @@ namespace core {
             getUsersWindows(os_users);
 
             if (os_users.empty()) {
-                assert (false && "Erro ao acessar a lista de usuários do sistema.");
-                // TODO exception
                 throw std::runtime_error("Erro ao acessar a lista de usuários do sistema.");
             }
         #else
@@ -315,8 +303,6 @@ namespace core {
 
             if (pw == nullptr) {
                 endpwent();
-                assert (false && "Erro ao acessar a lista de usuários do sistema.");
-                // TODO exception
                 throw std::runtime_error("Erro ao acessar a lista de usuários do sistema.");
             }
 
