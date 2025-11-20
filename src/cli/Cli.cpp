@@ -155,37 +155,35 @@ namespace cli
     {
         if (command == "mute")
         {
-            /*
+
             if (_player->isMuted())
             {
                 std::cout << "O player já está mudo." << std::endl;
                 return;
             }
-            */
 
             _player->mute();
         }
         else if (command == "unmute")
-        { /*
-             if (!_player->isMuted())
-             {
-                 std::cout << "O player não está no mudo." << std::endl;
-                 return;
-             }
-             */
+        {
+            if (!_player->isMuted())
+            {
+                std::cout << "O player não está no mudo." << std::endl;
+                return;
+            }
+
             _player->unmute();
         }
         else if (command == "toggle_mute")
-        { /*
-          if (_player->isMuted())
-          {
-              _player->unmute();
-          }
-          else
-          {
-              _player->mute();
-          }
-              */
+        {
+            if (_player->isMuted())
+            {
+                _player->unmute();
+            }
+            else
+            {
+                _player->mute();
+            }
         }
     }
 

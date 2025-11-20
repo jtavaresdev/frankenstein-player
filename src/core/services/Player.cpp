@@ -325,6 +325,11 @@ namespace core {
         return _playerState;
     }
 
+    bool Player::isMuted() const
+    {
+        return _volume == 0.0f;
+    }
+
     bool Player::isPlaying() const {
         return _playerState == PlayerState::PLAYING && ma_sound_is_playing(&_currentSound);
     }
