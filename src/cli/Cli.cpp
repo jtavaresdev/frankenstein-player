@@ -15,6 +15,19 @@
 
 namespace cli
 {
+
+    std::string trimSpaces(const std::string &str)
+    {
+        size_t firstNonSpace = str.find_first_not_of(" \t\n\r\f\v");
+
+        if (firstNonSpace == std::string::npos)
+        {
+            return "";
+        }
+
+        return str.substr(firstNonSpace);
+    }
+
     Cli::Cli(core::ConfigManager &config_manager)
     {
         std::string username;
@@ -142,32 +155,37 @@ namespace cli
     {
         if (command == "mute")
         {
+            /*
             if (_player->isMuted())
             {
                 std::cout << "O player já está mudo." << std::endl;
                 return;
             }
+            */
+
             _player->mute();
         }
         else if (command == "unmute")
-        {
-            if (!_player->isMuted())
-            {
-                std::cout << "O player não está no mudo." << std::endl;
-                return;
-            }
+        { /*
+             if (!_player->isMuted())
+             {
+                 std::cout << "O player não está no mudo." << std::endl;
+                 return;
+             }
+             */
             _player->unmute();
         }
         else if (command == "toggle_mute")
-        {
-            if (_player->isMuted())
-            {
-                _player->unmute();
-            }
-            else
-            {
-                _player->mute();
-            }
+        { /*
+          if (_player->isMuted())
+          {
+              _player->unmute();
+          }
+          else
+          {
+              _player->mute();
+          }
+              */
         }
     }
 
@@ -270,7 +288,7 @@ namespace cli
             return false;
         }
 
-        bool Cli::emoveFromPlaylist(Core::IPlayable &playlist, Core::IPlayable &playabel)
+        bool Cli::removeFromPlaylist(Core::IPlayable &playlist, Core::IPlayable &playabel)
         {
             return false;
         }
@@ -296,6 +314,31 @@ namespace cli
         {
         }
     */
+
+    void Cli::start()
+    {
+        std::string command;
+        std::cout << "Bem-vindo ao frankenstein Music Player!" << std::endl;
+        std::cout << "Digite 'help' para ver a lista de comandos disponíveis." << std::endl;
+
+        while (true)
+        {
+            std::cout << "frankenstein> ";
+            std::getline(std::cin, command);
+
+            if (command == "exit" || command == "quit")
+            {
+                std::cout << "Saindo do frankenstein Music Player. Até logo!" << std::endl;
+                break;
+            }
+
+            bool success = doCommand(command);
+            if (!success)
+            {
+                std::cout << "Digite um comando valido!" << std::endl;
+            }
+        }
+    }
 
     bool Cli::doCommand(const std::string &command)
     {
@@ -470,7 +513,7 @@ namespace cli
                 {
                     std::string playable;
                     std::getline(ss, playable);
-                    playable = trim(playable);
+                    playable = trimSpaces(playable);
                     if (!playable.empty())
                     {
                         auto opt = resolvePlayable(playable);
@@ -521,7 +564,7 @@ namespace cli
                 {
                     std::string playlist;
                     std::getline(ss, playlist);
-                    playlist = trim(playlist);
+                    playlist = trimSpaces(playlist);
                     if (!playlist.empty())
                     {
                         auto optPl = resolvePlayable(playlist);
@@ -545,7 +588,7 @@ namespace cli
                     {
                         std::string playable;
                         std::getline(ss, playable);
-                        playable = trim(playable);
+                        playable = trimSpaces(playable);
                         if (!playable.empty())
                         {
                             auto optPl = resolvePlayable(playlist);
@@ -581,7 +624,7 @@ namespace cli
                     {
                         std::string playable;
                         std::getline(ss, playable);
-                        playable = trim(playable);
+                        playable = trimSpaces(playable);
                         if (!playable.empty())
                         {
                             try
@@ -685,14 +728,9 @@ namespace cli
                     searchPlaylist(query);
                     return true;
                 }
-                else if (searchType == "podcast")
-                {
-                    searchPodcast(query);
-                    return true;
-                }
                 else
                 {
-                    std::cout << "Tipo de busca inválido. Use 'music', 'artist', 'album', 'playlist' ou 'podcast'." << std::endl;
+                    std::cout << "Tipo de busca inválido. Use 'music', 'artist', 'album' ou 'playlist'." << std::endl;
                     return false;
                 }
             }

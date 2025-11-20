@@ -24,7 +24,7 @@
 namespace cli
 {
 
-  #define volumeStep 0.05
+#define volumeStep 0.05
   class Cli
   {
   private:
@@ -37,14 +37,14 @@ namespace cli
      * @param str string a ser resolvida
      * @return optional com o IPlayable ou IPlayableObject resolvido
      */
-    std::optional<std::shared_ptr<Core::IPlayable>> resolvePlayable(const std::string &str);
+    std::optional<std::shared_ptr<core::IPlayable>> resolvePlayable(const std::string &str);
 
     /**
      * @brief toca um IPlayable ou um IPlayableObject
      *
      * @param playabel caminho para a música.
      */
-    void play(Core::IPlayable &playabel);
+    void play(core::IPlayable &playabel);
 
     /**
      * @brief recomeça a musica atual
@@ -149,7 +149,7 @@ namespace cli
      *
      * @param playlist Objeto IPlayable que representa a playlist a ser exibida.
      */
-    void showPlaylist(Core::IPlayable &playlist) const;
+    void showPlaylist(core::IPlayable &playlist) const;
 
     /**
      * @brief Adiciona um IPlayable à playlist atual.
@@ -159,7 +159,7 @@ namespace cli
      *
      * @return booleano indicando se a adição foi bem-sucedida
      */
-    bool addToPlaylist(Core::IPlayable &playlist, Core::IPlayable &playabel);
+    bool addToPlaylist(core::IPlayable &playlist, core::IPlayable &playabel);
 
     /**
      * @brief Remove um IPlayable da playlist atual.
@@ -169,7 +169,7 @@ namespace cli
      *
      * @return booleano indicando se a remoção foi bem-sucedida
      */
-    bool removeFromPlaylist(Core::IPlayable &playlist, Core::IPlayable &playabel);
+    bool removeFromPlaylist(core::IPlayable &playlist, core::IPlayable &playabel);
 
     /**
      * @brief Remove um IPlayable da playlist atual pelo índice.
@@ -179,7 +179,7 @@ namespace cli
      *
      * @return booleano indicando se a remoção foi bem-sucedida
      */
-    bool removeFromPlaylist(Core::IPlayable &playlist, unsigned int idx);
+    bool removeFromPlaylist(core::IPlayable &playlist, unsigned int idx);
 
     /**
      * @brief Coloca a fila atual no modo aleatório.
@@ -215,7 +215,7 @@ namespace cli
      * @brief Adiociona uma música na fila.
      * @param playabel Objeto IPlayable a ser adicionado a fil.
      */
-    void addToQueue(Core::IPlayable &playabel);
+    void addToQueue(core::IPlayable &playabel);
 
     /**
      * @brief Remove uma música na fila.
@@ -258,7 +258,6 @@ namespace cli
      */
     void searchPlaylist(const std::string &query) const;
 
-
     /**
      * @brief Mostra a ajuda com os comandos disponíveis.
      *
@@ -272,6 +271,14 @@ namespace cli
      */
     void showHelp(const std::string &topic) const;
 
+    /**
+     * @brief Recebe, trata e realiza uma string com o comando completo a ser realizado.
+     *
+     * @param command comando digitado e seus parâmetros
+     * @return booleano representando se o comando foi realizado com sucesso
+     */
+    bool doCommand(const std::string &command);
+
   public:
     /**
      * @brief Construtor de um novo objeto Cli
@@ -280,21 +287,17 @@ namespace cli
      */
     Cli(core::ConfigManager &config_manager);
 
-        /**
-         * @brief Destrutor de um objeto Cli
-         *
-         */
-        ~Cli();
-
-        void start();
+    /**
+     * @brief Destrutor de um objeto Cli
+     *
+     */
+    ~Cli();
 
     /**
-     * @brief Recebe, trata e realiza uma string com o comando completo a ser realizado.
-     *
-     * @param command comando digitado e seus parâmetros
-     * @return booleano representando se o comando foi realizado com sucesso
+     * @brief Inicia o um loop que recebe comandos do usuário e os processa.
      */
-    bool doCommand(const std::string &command);
+
+    void start();
   };
 }
 
