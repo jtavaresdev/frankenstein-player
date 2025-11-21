@@ -9,6 +9,7 @@
 #include "core/entities/Song.hpp"
 #include <memory>
 #include <string>
+#include <vector>
 /*
  * CREATE TABLE IF NOT EXISTS songs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,12 +33,11 @@
 namespace core {
 
     SongRepository::SongRepository(std::shared_ptr<SQLite::Database> db)
-        : SQLiteRepositoryBase<Song>(db, "songs") {}
+        : SQLiteRepositoryBase<Song>(db, "songs") {
+    }
 
-    bool SongRepository::insert(const Song& entity) {
-        std::string sql = "INSERT INTO " + _table_name
-                          + " (title, duration, artist_id, user_id) "
-                          + "VALUES(?, ?, ?, ?);";
+    bool SongRepository::insert(const Song &entity) {
+        std::string sql = "INSERT INTO " + _table_name + " (title, duration, artist_id, user_id) " + "VALUES(?, ?, ?, ?);";
 
         SQLite::Statement query = prepare(sql);
         query.bind(1, entity.getTitle());
@@ -48,10 +48,9 @@ namespace core {
         return query.exec() > 0;
     };
 
-    bool SongRepository::update(const Song& entity) {
-        std::string sql = "UPDATE " + _table_name
-                          + " SET title = ?, artist_id = ?, user_id = ? "
-                            "WHERE id = ?;";  // nao faz sentido trocar duration
+    bool SongRepository::update(const Song &entity) {
+        std::string sql = "UPDATE " + _table_name + " SET title = ?, artist_id = ?, user_id = ? "
+                                                    "WHERE id = ?;"; // nao faz sentido trocar duration
 
         SQLite::Statement query = prepare(sql);
         query.bind(1, entity.getTitle());
@@ -62,7 +61,7 @@ namespace core {
     };
 
     std::shared_ptr<Song>
-    SongRepository::mapRowToEntity(SQLite::Statement& query) const {
+    SongRepository::mapRowToEntity(SQLite::Statement &query) const {
         unsigned id = query.getColumn("id").getInt();
         std::string title = query.getColumn("title").getString();
         unsigned artist_id = query.getColumn("artist_id").getInt();
@@ -72,7 +71,7 @@ namespace core {
 
         return std::make_shared<Song>(id, title, artist_id, user_id);
     }
-    bool SongRepository::save(Song& entity) {
+    bool SongRepository::save(Song &entity) {
         if (entity.getId() == 0) {
             return insert(entity);
         } else {
@@ -81,8 +80,6 @@ namespace core {
     };
 
     bool SongRepository::remove(unsigned id) {
-        // todo id exception caso id for negativo entre outros casos
-
         std::string sql = "DELETE FROM " + _table_name + " WHERE id = ?;";
 
         SQLite::Statement query = prepare(sql);
@@ -93,13 +90,12 @@ namespace core {
     };
 
     std::vector<std::shared_ptr<Song>>
-    SongRepository::findByTitleAndUser(const std::string& title,
-                                       const User& user) const {
-        std::string sql = "SELECT * FROM " + _table_name
-                          + " WHERE title LIKE ? AND user_id = ?;";
+    SongRepository::findByTitleAndUser(const std::string &title,
+                                       const User &user) const {
+        std::string sql = "SELECT * FROM " + _table_name + " WHERE title LIKE ? AND user_id = ?;";
 
         SQLite::Statement query = prepare(sql);
-        query.bind(1, "%" + title + "%");  // "%" nao considera char especial
+        query.bind(1, "%" + title + "%"); // "%" nao considera char especial
         query.bind(2, user.getId());
 
         std::vector<std::shared_ptr<Song>> songs;
@@ -111,10 +107,9 @@ namespace core {
     }
 
     std::vector<std::shared_ptr<Song>>
-    SongRepository::findByUser(const User& user) const {
+    SongRepository::findByUser(const User &user) const {
 
-        std::string sql = "SELECT * FROM " + _table_name
-                          + " WHERE user_id = ? ORDER BY title;";
+        std::string sql = "SELECT * FROM " + _table_name + " WHERE user_id = ? ORDER BY title;";
 
         SQLite::Statement query = prepare(sql);
 
@@ -130,10 +125,9 @@ namespace core {
     };
 
     std::vector<std::shared_ptr<Song>>
-    SongRepository::findByArtist(const Artist& artist) const {
+    SongRepository::findByArtist(const Artist &artist) const {
 
-        std::string sql = "SELECT * FROM " + _table_name
-                          + " WHERE artist_id = ? ORDER BY title;";
+        std::string sql = "SELECT * FROM " + _table_name + " WHERE artist_id = ? ORDER BY title;";
 
         SQLite::Statement query = prepare(sql);
 
@@ -149,9 +143,8 @@ namespace core {
     };
 
     std::vector<std::shared_ptr<Song>>
-    SongRepository::findByAlbum(const Album& album) const {
-        std::string sql = "SELECT * FROM " + _table_name
-                          + " WHERE album_id = ? ORDER BY title;";
+    SongRepository::findByAlbum(const Album &album) const {
+        std::string sql = "SELECT * FROM " + _table_name + " WHERE album_id = ? ORDER BY title;";
 
         SQLite::Statement query = prepare(sql);
 
@@ -179,7 +172,7 @@ namespace core {
         return nullptr;
     };
 
-    std::shared_ptr<Album> SongRepository::getAlbum(const Song& song) const {
+    std::shared_ptr<Album> SongRepository::getAlbum(const Song &song) const {
         std::string sql = "SELECT album_id FROM songs WHERE id = ?;";
         SQLite::Statement query = prepare(sql);
         query.bind(1, song.getId());
@@ -194,7 +187,7 @@ namespace core {
         return nullptr;
     };
 
-    std::shared_ptr<Artist> SongRepository::getArtist(const Song& song) const {
+    std::shared_ptr<Artist> SongRepository::getArtist(const Song &song) const {
         std::string sql = "SELECT artist_id FROM songs WHERE id = ?;";
         SQLite::Statement query = prepare(sql);
         query.bind(1, song.getId());
@@ -210,10 +203,26 @@ namespace core {
     };
 
     std::vector<std::shared_ptr<Artist>>
-    SongRepository::getFeaturingArtists(const Song& song) const {
-        // TODO
-        //
-        return {};
+    SongRepository::getFeaturingArtists(const Song &song) const {
+        std::string sql = "SELECT a.* FROM artists a "
+                          "JOIN song_artists sa ON a.id = sa.artist_id "
+                          "WHERE sa.song_id = ? AND sa.is_principal = 0;";
+
+        SQLite::Statement query = prepare(sql);
+        query.bind(1, song.getId());
+
+        ArtistRepository artist_repo(_db);
+        std::vector<std::shared_ptr<Artist>> artists;
+
+        while (query.executeStep()) {
+            unsigned id = query.getColumn("id").getInt();
+            std::string name = query.getColumn("name").getString();
+            unsigned user_id = query.getColumn("user_id").getInt();
+
+            artists.push_back(std::make_shared<Artist>(id, name, user_id));
+        }
+
+        return artists;
     };
 
     size_t SongRepository::count() const {
@@ -228,4 +237,44 @@ namespace core {
         return 0;
     }
 
-}  // namespace core
+    bool SongRepository::addFeaturingArtist(const Song &song, const Artist &artist, const User &user) const {
+        std::string sql = "INSERT OR IGNORE INTO song_artists (song_id, artist_id, user_id, is_principal) "
+                          "VALUES (?, ?, ?, 0);";
+
+        SQLite::Statement query = prepare(sql);
+        query.bind(1, song.getId());
+        query.bind(2, artist.getId());
+        query.bind(3, user.getId());
+
+        return query.exec() > 0;
+    }
+
+    bool SongRepository::removeFeaturingArtist(const Song &song, const Artist &artist) const {
+        std::string sql = "DELETE FROM song_artists "
+                          "WHERE song_id = ? AND artist_id = ? AND is_principal = 0;";
+
+        SQLite::Statement query = prepare(sql);
+        query.bind(1, song.getId());
+        query.bind(2, artist.getId());
+
+        return query.exec() > 0;
+    }
+
+    bool SongRepository::setPrincipalArtist(const Song &song, const Artist &artist, const User &user) const {
+
+        std::string delete_sql = "DELETE FROM song_artists WHERE song_id = ? AND is_principal = 1;";
+        SQLite::Statement delete_query = prepare(delete_sql);
+        delete_query.bind(1, song.getId());
+        delete_query.exec();
+
+        std::string insert_sql = "INSERT INTO song_artists (song_id, artist_id, user_id, is_principal) "
+                                 "VALUES (?, ?, ?, 1);";
+        SQLite::Statement insert_query = prepare(insert_sql);
+        insert_query.bind(1, song.getId());
+        insert_query.bind(2, artist.getId());
+        insert_query.bind(3, user.getId());
+
+        return insert_query.exec() > 0;
+    }
+
+} // namespace core
