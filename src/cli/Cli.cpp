@@ -221,6 +221,22 @@ namespace cli
         }
     }
 
+    void Cli::addToQueue(core::IPlayable &playabel)
+    {
+        core::RepositoryFactory repo_factory(std::make_shared<SQLite::Database>(_db));
+
+        auto tracks = core::PlaybackQueue(_user, playabel, repo_factory.createHistoryPlaybackRepository());
+        _player->addPlaybackQueue(tracks);
+        std::cout << "Adicionado à fila de reprodução." << std::endl;
+    }
+
+    void Cli::showQueue() const
+    {
+        auto queue = _player->getCurrentQueue();
+        std::cout << "Fila de reprodução: \n"
+                  << queue->toString();
+    }
+
     // TODO: implementar (depende de player)
     /*
         std::string Cli::getCurrentSong() const
@@ -247,18 +263,11 @@ namespace cli
             _player->deslikeCurrentSong();
         }
 
-        void Cli::addToQueue(Core::IPlayable &playabel)
-        {
-            _player->addToPlaybackQueue(playabel);
-        }
         void Cli::removeFromQueue(unsigned idx)
         {
             _player->removeFromPlaybackQueue(idx);
         }
-        void Cli::showQueue() const
-        {
-            _player->showPlaybackQueue();
-        }
+
         void Cli::showStatus() const
         {
             _player->showStatus();

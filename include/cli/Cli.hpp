@@ -25,7 +25,7 @@
 #include "core/entities/Album.hpp"
 #include "core/interfaces/IPlayable.hpp"
 #include "core/bd/SongRepository.hpp"
-
+#include "core/bd/RepositoryFactory.hpp"
 
 namespace cli
 {
@@ -37,7 +37,7 @@ namespace cli
   private:
     std::shared_ptr<core::User> _user;
     std::shared_ptr<core::Player> _player;
-    std::shared_ptr<SQLite::Database> db;
+    std::shared_ptr<SQLite::Database> _db;
 
     /**
      * @brief resolve uma string para um IPlayable ou IPlayableObject
