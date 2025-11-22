@@ -26,6 +26,7 @@
 #include "core/interfaces/IPlayable.hpp"
 #include "core/bd/SongRepository.hpp"
 #include "core/bd/RepositoryFactory.hpp"
+#include "core/services/Library.hpp"
 
 namespace cli
 {
@@ -37,15 +38,8 @@ namespace cli
   private:
     std::shared_ptr<core::User> _user;
     std::shared_ptr<core::Player> _player;
+    std::shared_ptr<core::Library> _library;
     std::shared_ptr<SQLite::Database> _db;
-
-    /**
-     * @brief resolve uma string para um IPlayable ou IPlayableObject
-     *
-     * @param str string a ser resolvida
-     * @return optional com o IPlayable ou IPlayableObject resolvido
-     */
-    std::optional<std::shared_ptr<core::IPlayable>> resolvePlayable(const std::string &str);
 
     /**
      * @brief toca um IPlayable ou um IPlayableObject
@@ -180,7 +174,7 @@ namespace cli
      *
      * @return booleano indicando se a adição foi bem-sucedida
      */
-    bool addToPlaylist(core::IPlayable &playlist, core::IPlayable &playabel);
+    bool addToPlaylist(const core::IPlayable &playlist, const core::IPlayable &playabel);
 
     /**
      * @brief Remove um IPlayable da playlist atual.
@@ -190,17 +184,7 @@ namespace cli
      *
      * @return booleano indicando se a remoção foi bem-sucedida
      */
-    bool removeFromPlaylist(core::IPlayable &playlist, core::IPlayable &playabel);
-
-    /**
-     * @brief Remove um IPlayable da playlist atual pelo índice.
-     *
-     * @param playlist Objeto IPlayable que representa a playlist de onde o IPlayable será removido.
-     * @param idx Índice do objeto IPlayable a ser removido da playlist.
-     *
-     * @return booleano indicando se a remoção foi bem-sucedida
-     */
-    bool removeFromPlaylist(core::IPlayable &playlist, unsigned int idx);
+    bool removeFromPlaylist(const core::IPlayable &playlist, const core::IPlayable &playabel);
 
     /**
      * @brief Coloca a fila atual no modo aleatório.

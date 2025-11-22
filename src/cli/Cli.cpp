@@ -27,6 +27,16 @@ namespace cli
 
     Cli::Cli(core::ConfigManager &config_manager)
     {
+        try
+        {
+            _db = std::make_shared<SQLite::Database>(config_manager.databasePath(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Erro ao conectar ao banco de dados: " << e.what() << std::endl;
+            throw;
+        }
+
         std::string username;
         std::string home_path;
         std::string input_path;
@@ -75,6 +85,8 @@ namespace cli
         _user = std::make_shared<core::User>(username, home_path, input_path, std::stoi(uid));
 
         _player = std::make_shared<core::Player>();
+
+        _library = std::make_shared<core::Library>(_user, _db);
     }
 
     /*
@@ -194,11 +206,6 @@ namespace cli
         _player->clearPlaylist();
     }
 
-    void Cli::showQueue() const
-    {
-        std::cout << _player->getPlaybackQueue()->toString();
-    }
-
     void Cli::loop(const std::string &command)
     {
         if (command == "on")
@@ -223,11 +230,18 @@ namespace cli
 
     void Cli::addToQueue(core::IPlayable &playabel)
     {
-        core::RepositoryFactory repo_factory(std::make_shared<SQLite::Database>(_db));
+        try
+        {
+            core::RepositoryFactory repo_factory(_db);
 
-        auto tracks = core::PlaybackQueue(_user, playabel, repo_factory.createHistoryPlaybackRepository());
-        _player->addPlaybackQueue(tracks);
-        std::cout << "Adicionado à fila de reprodução." << std::endl;
+            auto tracks = core::PlaybackQueue(_user, playabel, repo_factory.createHistoryPlaybackRepository());
+            _player->addPlaybackQueue(tracks);
+            std::cout << "Adicionado à fila de reprodução." << std::endl;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Erro ao adicionar à fila de reprodução: " << e.what() << std::endl;
+        }
     }
 
     void Cli::showQueue() const
@@ -237,12 +251,34 @@ namespace cli
                   << queue->toString();
     }
 
+    void Cli::like()
+    {
+        auto curtidas = _library->searchPlaylist("curtidas");
+        auto queue = _player->getCurrentQueue();
+        addToPlaylist(*curtidas[0], *queue->getCurrentSong());
+    }
+    void Cli::deslike()
+    {
+        auto curtidas = _library->searchPlaylist("curtidas");
+        auto queue = _player->getCurrentQueue();
+        removeFromPlaylist(*curtidas[0], *queue->getCurrentSong());
+    }
+
+    bool Cli::addToPlaylist(const core::IPlayable &playlist, const core::IPlayable &playabel)
+    {
+        _library->addToPlaylist(playlist, playabel);
+
+        return true;
+    }
+
+    bool Cli::removeFromPlaylist(const core::IPlayable &playlist, const core::IPlayable &playabel)
+    {
+        _library->removeFromPlaylist(playlist, playabel);
+        return true;
+    }
+
     // TODO: implementar (depende de player)
     /*
-        std::string Cli::getCurrentSong() const
-        {
-            _player->getCurrentSong();
-        }
 
         void Cli::play(Core::IPlayable &playabel)
         {
@@ -252,15 +288,6 @@ namespace cli
         void Cli::shuffle()
         {
             _player->shuffle();
-        }
-
-        void Cli::like()
-        {
-            _player->likeCurrentSong();
-        }
-        void Cli::deslike()
-        {
-            _player->deslikeCurrentSong();
         }
 
         void Cli::removeFromQueue(unsigned idx)
@@ -273,42 +300,91 @@ namespace cli
             _player->showStatus();
         }
 
-    */
-
-    // TODO implementar
-    /*
-
-        bool Cli::addToPlaylist(Core::IPlayable &playlist, Core::IPlayable &playabel)
+        void Cli::showHelp (std::string command) const
         {
-            return false;
-        }
-
-        bool Cli::removeFromPlaylist(Core::IPlayable &playlist, Core::IPlayable &playabel)
-        {
-            return false;
-        }
-
-        bool Cli::removeFromPlaylist(Core::IPlayable &playlist, unsigned int idx)
-        {
-            return false;
-        }
-
-        void Cli::searchMusic(const std::string &query) const
-        {
-        }
-
-        void Cli::searchArtist(const std::string &query) const
-        {
-        }
-
-        void Cli::searchAlbum(const std::string &query) const
-        {
-        }
-
-        void Cli::searchPlaylist(const std::string &query) const
-        {
+            // implementar
         }
     */
+
+    void Cli::searchSong(const std::string &query) const
+    {
+        auto songs = _library->searchSong(query);
+        if (songs.empty())
+        {
+            std::cout << "Nenhuma música encontrada para: " << query << std::endl;
+            return;
+        }
+        else if (songs.size() == 1)
+        {
+            std::cout << "1 música encontrada: " << songs.at(0)->getTitle() << std::endl;
+        }
+        else
+        {
+            std::cout << songs.size() << "Músicas encontradas: \n";
+            for (auto song : songs)
+                std::cout << song->getTitle() << std::endl;
+        }
+    }
+
+    void Cli::searchArtist(const std::string &query) const
+    {
+        auto artists = _library->searchArtist(query);
+        if (artists.empty())
+        {
+            std::cout << "Nenhum artista encontrado para:" << query << std::endl;
+            return;
+        }
+        else if (artists.size() == 1)
+        {
+            std::cout << "1 artista encontrado: " << artists.at(0)->getName() << std::endl;
+        }
+        else
+        {
+            std::cout << artists.size() << "Artistas encontrados: \n";
+            for (auto artist : artists)
+                std::cout << artist->getName() << std::endl;
+        }
+    }
+
+    void Cli::searchAlbum(const std::string &query) const
+    {
+        auto albums = _library->searchAlbum(query);
+        if (albums.empty())
+        {
+            std::cout << "Nenhum album encontrado para: " << query << std::endl;
+            return;
+        }
+        else if (albums.size() == 1)
+        {
+            std::cout << "1 album encontrado: " << albums.at(0)->getName() << std::endl;
+        }
+        else
+        {
+            std::cout << albums.size() << "Albuns encontrados: \n";
+            for (auto album : albums)
+                std::cout << album->getName() << " por " << album->getArtist()->getName() << std::endl;
+        }
+    }
+
+    void Cli::searchPlaylist(const std::string &query) const
+    {
+        auto playlists = _library->searchPlaylist(query);
+        if (playlists.empty())
+        {
+            std::cout << "Nenhuma playlist encontrada para: " << query << std::endl;
+            return;
+        }
+        else if (playlists.size() == 1)
+        {
+            std::cout << "1 playlist encontrada: " << playlists.at(0)->getTitle() << std::endl;
+        }
+        else
+        {
+            std::cout << playlists.size() << "Playlists encontradas: \n";
+            for (auto playlist : playlists)
+                std::cout << playlist->getTitle() << std::endl;
+        }
+    }
 
     void Cli::showPlaylist(core::IPlayable &playlist) const
     {
@@ -408,13 +484,13 @@ namespace cli
                     return true;
                 }
 
-                auto optPlayable = resolvePlayable(playable);
-                if (!optPlayable)
+                auto optPlayable = _library->searchSong(playable);
+                if (optPlayable.empty())
                 {
                     std::cout << "Não encontrado: " << playable << std::endl;
                     return false;
                 }
-                auto sp = *optPlayable;
+                auto sp = optPlayable.at(0);
                 play(*sp);
                 return true;
             }
@@ -555,13 +631,13 @@ namespace cli
                     playable = trimSpaces(playable);
                     if (!playable.empty())
                     {
-                        auto opt = resolvePlayable(playable);
-                        if (!opt)
+                        auto opt = _library->searchSong(playable);
+                        if (opt.empty())
                         {
-                            std::cout << "Não encontrado: " << playable << std::endl;
+                            std::cout << "Música não encontrada: " << playable << std::endl;
                             return false;
                         }
-                        auto sp = *opt;
+                        auto sp = opt.at(0);
                         addToQueue(*sp);
                         return true;
                     }
@@ -606,13 +682,13 @@ namespace cli
                     playlist = trimSpaces(playlist);
                     if (!playlist.empty())
                     {
-                        auto optPl = resolvePlayable(playlist);
-                        if (!optPl)
+                        auto optPl = _library->searchPlaylist(playlist);
+                        if (optPl.empty())
                         {
                             std::cout << "Playlist não encontrada: " << playlist << std::endl;
                             return false;
                         }
-                        auto spPl = *optPl;
+                        auto spPl = optPl.at(0);
                         showPlaylist(*spPl);
                         return true;
                     }
@@ -623,6 +699,8 @@ namespace cli
                 else if (playlistCommand == "add")
                 {
                     std::string playlist;
+
+                    // mudar para std::getline(ss, playlist);
                     if (ss >> playlist)
                     {
                         std::string playable;
@@ -630,20 +708,20 @@ namespace cli
                         playable = trimSpaces(playable);
                         if (!playable.empty())
                         {
-                            auto optPl = resolvePlayable(playlist);
-                            if (!optPl)
+                            auto optPl = _library->searchPlaylist(playlist);
+                            if (optPl.empty())
                             {
                                 std::cout << "Playlist não encontrada: " << playlist << std::endl;
                                 return false;
                             }
-                            auto optSong = resolvePlayable(playable);
-                            if (!optSong)
+                            auto optSong = _library->searchSong(playable);
+                            if (optSong.empty())
                             {
-                                std::cout << "Música não encontrada: " << playable << std::endl;
+                                std::cout << "Musica não encontrada: " << playable << std::endl;
                                 return false;
                             }
-                            auto spPl = *optPl;
-                            auto spSong = *optSong;
+                            auto spPl = optPl.at(0);
+                            auto spSong = optSong.at(0);
                             addToPlaylist(*spPl, *spSong);
                             return true;
                         }
@@ -659,6 +737,8 @@ namespace cli
                 else if (playlistCommand == "remove")
                 {
                     std::string playlist;
+
+                    // mudar para std::getline(ss, playlist);
                     if (ss >> playlist)
                     {
                         std::string playable;
@@ -666,68 +746,33 @@ namespace cli
                         playable = trimSpaces(playable);
                         if (!playable.empty())
                         {
-                            try
-                            {
-                                size_t pos;
-                                int value = std::stoi(playable, &pos);
 
-                                // Verifica se toda a string foi convertida
-                                if (pos == playable.length())
-                                {
-                                    auto optPl = resolvePlayable(playlist);
-                                    if (!optPl)
-                                    {
-                                        std::cout << "Playlist não encontrada: " << playlist << std::endl;
-                                        return false;
-                                    }
-                                    auto spPl = *optPl;
-                                    if (value < 0)
-                                    {
-                                        std::cout << "Índice inválido: " << value << std::endl;
-                                        return false;
-                                    }
-                                    removeFromPlaylist(*spPl, static_cast<unsigned int>(value));
-                                    return true;
-                                }
-                                std::cout << "Por favor, forneça o nome da música ou posicao dela para remover da playlist." << std::endl;
-                                showHelp("playlist");
-                                return true;
-                            }
-                            catch (const std::invalid_argument &)
+                            auto optPl = _library->searchPlaylist(playlist);
+                            if (optPl.empty())
                             {
-                                // String não é um número válido -> trata como nome da música
-                                {
-                                    auto optPl = resolvePlayable(playlist);
-                                    if (!optPl)
-                                    {
-                                        std::cout << "Playlist não encontrada: " << playlist << std::endl;
-                                        return false;
-                                    }
-                                    auto optSong = resolvePlayable(playable);
-                                    if (!optSong)
-                                    {
-                                        std::cout << "Música não encontrada: " << playable << std::endl;
-                                        return false;
-                                    }
-                                    auto spPl = *optPl;
-                                    auto spSong = *optSong;
-                                    removeFromPlaylist(*spPl, *spSong);
-                                    return true;
-                                }
-                            }
-                            catch (const std::out_of_range &)
-                            {
-                                std::cout << "O valor fornecido está fora do intervalo." << std::endl;
+                                std::cout << "Playlist não encontrada: " << playlist << std::endl;
                                 return false;
                             }
+                            auto spPl = optPl.at(0);
+
+                            auto optSong = _library->searchSong(playable);
+                            if (optSong.empty())
+                            {
+                                std::cout << "Música não encontrada: " << playable << std::endl;
+                                return false;
+                            }
+                            auto spPl = optPl.at(0);
+                            auto spSong = optSong.at(0);
+                            removeFromPlaylist(*spPl, *spSong);
+                            return true;
                         }
 
-                        std::cout << "Por favor, forneça o nome da música ou posicao dela para remover da playlist." << std::endl;
+                        std::cout << "Por favor, forneça o nome da música para remover da playlist." << std::endl;
                         showHelp("playlist");
                         return true;
                     }
 
-                    std::cout << "Por favor, forneça o nome da da playlist e nome da musica a ser removida." << std::endl;
+                    std::cout << "Por favor, forneça o nome da playlist e nome da musica a ser removida." << std::endl;
                     showHelp("playlist");
                     return true;
                 }
