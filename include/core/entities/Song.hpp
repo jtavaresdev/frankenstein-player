@@ -25,6 +25,7 @@ namespace core {
     // Forward declaration
     class Album;
     class Artist;
+    class SongRepository;
 
     /**
      * @class Song
@@ -143,6 +144,7 @@ namespace core {
          * colaboradores
          */
         std::vector<std::shared_ptr<const Artist>> getFeaturingArtists();
+
         /**
          * @brief Obtém o álbum
          * @return Nome do álbum

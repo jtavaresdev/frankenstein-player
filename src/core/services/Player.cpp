@@ -27,6 +27,7 @@ namespace core {
         std::cout << "Audio engine inicializado" << std::endl;
 
         ma_sound_config soundConfig = ma_sound_config_init();
+        // TODO
         soundConfig.pFilePath = "";
         result = ma_sound_init_ex(&_audioEngine, &soundConfig, &_currentSound);
         if (result != MA_SUCCESS) {

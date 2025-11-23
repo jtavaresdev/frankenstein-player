@@ -1,4 +1,6 @@
 #include "core/entities/Album.hpp"
+#include "core/bd/ArtistRepository.hpp"
+#include "core/entities/Artist.hpp"
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include <cassert>
 #include <cstddef>
@@ -65,8 +67,19 @@ namespace core {
 
     std::vector<std::shared_ptr<const Artist>>
     Album::getFeaturingArtists() const {
-        // TODO
-        return std::vector<std::shared_ptr<const Artist>>();
+        if (featuringArtistsLoader) {
+            auto allArtists = featuringArtistsLoader();
+            std::vector<std::shared_ptr<const Artist>> featuring;
+
+            if (allArtists.size() > 1) {
+                for (auto it = allArtists.begin(); it != allArtists.end(); ++it) {
+                    featuring.push_back(std::const_pointer_cast<const Artist>(*it));
+                }
+            }
+
+            return featuring;
+        }
+        return {};
     };
 
     std::string Album::getGenre() const {
