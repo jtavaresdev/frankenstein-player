@@ -146,6 +146,10 @@ namespace core {
         featuringArtistsLoader = loader;
     };
 
+    void Album::setUser(std::shared_ptr<User> user) {
+        _user = user;
+    }
+
     std::string Album::toString() const {
         std::string info = "{Album: " + _name + ", Artista: " + _artist->getName() + ", Ano: " + std::to_string(_year) + "}";
 

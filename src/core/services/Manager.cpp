@@ -31,7 +31,7 @@ namespace core
         song->setTitle(tag->title().isEmpty() ? "Unknown Title" : tag->title().toCString());
         song->setGenre(tag->genre().isEmpty() ? "Unknown Genre" : tag->genre().toCString());
         song->setYear(tag->year() == 0 ? 1900 : tag->year());
-        // song->setDuration(file.audioProperties() ? file.audioProperties()->length() : 0);
+        song->setDuration(file.audioProperties() ? file.audioProperties()->length() : 0);
 
         std::string artistName = tag->artist().isEmpty() ? "Unknown Artist" : tag->artist().toCString();
         std::vector<std::shared_ptr<Artist>> artists = _artistRepo->findByName(artistName);
@@ -67,7 +67,7 @@ namespace core
         {
             album = std::make_shared<Album>(albumTitle, artist, song->getGenre());
             album->setYear(song->getYear());
-            // album.setUser(song->getUser());
+            album->setUser(song->getUser());
             _albumRepo->save(*album);
         }
         song->setAlbum(*album);

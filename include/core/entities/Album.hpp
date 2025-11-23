@@ -112,6 +112,7 @@ namespace core {
          * @return shared_ptr<User>
          */
         std::shared_ptr<User> getUser() const;
+
         /**
          * @brief Obtém o artista do álbum
          * @return Nome do artista/banda
@@ -193,6 +194,8 @@ namespace core {
         void setFeaturingArtistsLoader(
             const std::function<std::vector<std::shared_ptr<Artist>>()> &
                 loader);
+
+        void setUser(std::shared_ptr<User> user);
 
         /**
          * @brief Obtém informações do álbum em formato de string

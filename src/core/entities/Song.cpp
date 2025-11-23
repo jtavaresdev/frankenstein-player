@@ -187,6 +187,10 @@ namespace core {
         _year = year;
     };
 
+    void Song::setDuration(int sec) {
+        _duration = sec;
+    }
+
     std::string Song::getFormattedDuration() const {
         int totalSeconds = getDuration();
         int h = totalSeconds / 3600;

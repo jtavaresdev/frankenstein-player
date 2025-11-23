@@ -236,6 +236,8 @@ namespace core {
          * @param year Novo ano
          */
         void setYear(int year);
+
+        void setDuration(int sec);
         // Métodos
 
         /**
