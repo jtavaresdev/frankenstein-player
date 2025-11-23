@@ -38,12 +38,12 @@ namespace core {
                    public core::ICollection,
                    public core::IPlayable {
     private:
-        unsigned _id = 0; // TODO nao ta gerando apartir de entity
+        // unsigned _id = 0; // Da erro
         std::string _name;
         std::string _genre;
         std::vector<std::shared_ptr<Song>> _songs;
         std::vector<std::shared_ptr<Album>> _albums;
-        std::shared_ptr<User> user; // TODO Trocar para User?
+        std::shared_ptr<User> _user; // TODO Trocar para User?
         unsigned _user_id;
 
         std::function<std::vector<std::shared_ptr<Song>>()> songsLoader;
@@ -124,6 +124,12 @@ namespace core {
          * @param genre Novo gênero musical
          */
         void setGenre(const std::string &genre);
+
+        /**
+         * @brief Define o usuário associado ao artista
+         * @param user Ponteiro compartilhado para o usuário
+         */
+        void setUser(const User &user);
 
         /**
          * @brief Adiciona uma música ao artista

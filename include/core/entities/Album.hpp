@@ -21,6 +21,7 @@
 #include "core/entities/Artist.hpp"
 #include "core/entities/Entity.hpp"
 #include "core/entities/Song.hpp"
+#include "core/entities/User.hpp"
 #include "core/interfaces/ICollection.hpp"
 #include "core/interfaces/IPlayable.hpp"
 
@@ -39,7 +40,6 @@ namespace core {
                   public ICollection,
                   public IPlayableObject {
     private:
-        unsigned _id;
         std::string _file_path;
         std::string _name;
         unsigned _artist_id;
@@ -173,6 +173,12 @@ namespace core {
          * @param year Novo ano de lançamento
          */
         void setYear(int year);
+
+        /**
+         * @brief Define o usuário associado ao álbum
+         * @param user Ponteiro compartilhado para o usuário
+         */
+        void setUser(const User &user);
 
         /**
          * @brief Define a função para carregar o artista do álbum

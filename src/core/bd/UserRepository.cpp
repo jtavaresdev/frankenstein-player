@@ -11,11 +11,14 @@
 #include "core/bd/UserRepository.hpp"
 
 
+#include <iostream>
+
+
 namespace core {
     UserRepository::UserRepository(std::shared_ptr<SQLite::Database> db) :
         SQLiteRepositoryBase<User>(db, "users") {}
 
-    bool UserRepository::insert(const User& entity) {
+    bool UserRepository::insert(User& entity) {
         SQLite::Statement query(*_db,
                                 "INSERT INTO users (username, home_path, "
                                 "input_path, uid) "

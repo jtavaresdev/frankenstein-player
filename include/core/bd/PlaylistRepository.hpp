@@ -36,7 +36,7 @@ namespace core {
          * @param entity Playlist a ser inserida
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool insert(const Playlist& entity) override;
+        bool insert(Playlist& entity) override;
 
         /**
          * @brief Atualiza uma playlist existente no repositório

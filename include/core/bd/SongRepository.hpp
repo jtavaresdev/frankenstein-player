@@ -39,7 +39,7 @@ namespace core {
          * @param entity Musica a ser inserida
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool insert(const Song &entity) override;
+        bool insert(Song &entity) override;
 
         /**
          * @brief Atualiza uma musica existente no repositório

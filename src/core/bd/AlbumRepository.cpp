@@ -24,7 +24,7 @@ namespace core {
     AlbumRepository::AlbumRepository(std::shared_ptr<SQLite::Database> db)
         : core::SQLiteRepositoryBase<Album>(db, "albums") {};
 
-    bool AlbumRepository::insert(const Album &entity) {
+    bool AlbumRepository::insert(Album &entity) {
         std::string sql = "INSERT INTO " + _table_name + " (title, release_year, genre, user_id) " + "VALUES (?, ?, ?, ?);";
         SQLite::Statement query = prepare(sql);
 
@@ -33,7 +33,12 @@ namespace core {
         query.bind(3, entity.getGenre());
         query.bind(4, entity.getUser()->getId());
 
-        return query.exec() > 0;
+        bool success = query.exec() > 0;
+
+        if (success)
+            entity.setId(static_cast<unsigned>(getLastInsertId()));
+
+        return success;
     };
 
     bool AlbumRepository::update(const Album &entity) {
@@ -209,7 +214,7 @@ namespace core {
         delete_query.bind(1, album.getId());
         delete_query.exec();
 
-        std::string insert_sql = "INSERT INTO album_artists (album_id, artist_id, user_id, is_principal) "
+        std::string insert_sql = "INSERT OR REPLACE INTO album_artists (album_id, artist_id, user_id, is_principal) "
                                  "VALUES (?, ?, ?, 1);";
         SQLite::Statement insert_query = prepare(insert_sql);
         insert_query.bind(1, album.getId());

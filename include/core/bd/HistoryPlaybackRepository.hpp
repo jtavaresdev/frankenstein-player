@@ -36,7 +36,7 @@ namespace core {
          * @param entity Historico de reproducao a ser inserido
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool insert(const HistoryPlayback& entity) override;
+        bool insert(HistoryPlayback& entity) override;
 
         /**
          * @brief Atualiza um historico de reproducao existente no repositório
@@ -81,7 +81,7 @@ namespace core {
          * @param entity Historico de reproducao a ser inserido
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool insertHistoryPlayback(const HistoryPlayback& entity);
+        bool insertHistoryPlayback(HistoryPlayback& entity);
 
         /**
          * @brief Insere multiplos historicos de reproducoes no repositório
@@ -90,7 +90,7 @@ namespace core {
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
         bool
-        insertMultipleHistoryPlaybacks(const std::vector<HistoryPlayback>& entities);
+        insertMultipleHistoryPlaybacks(std::vector<HistoryPlayback>& entities);
 
         /**
          * @brief Conta o número de reproduções de uma música

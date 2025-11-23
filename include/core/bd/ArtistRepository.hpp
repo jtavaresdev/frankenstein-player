@@ -38,7 +38,7 @@ namespace core {
          * @param entity Artista a ser inserido
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool insert(const Artist& entity) override;
+        bool insert(Artist& entity) override;
 
         /**
          * @brief Atualiza um artista existente no repositório

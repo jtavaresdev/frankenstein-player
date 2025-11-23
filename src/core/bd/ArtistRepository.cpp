@@ -21,15 +21,22 @@ namespace core {
     ArtistRepository::ArtistRepository(std::shared_ptr<SQLite::Database> db)
         : core::SQLiteRepositoryBase<Artist>(db, "artists") {};
 
-    bool ArtistRepository::insert(const Artist& entity) {
+    bool ArtistRepository::insert(Artist& entity) {
+        if (!entity.getUser())
+            throw std::invalid_argument("Artist must be associated with a User.");
         std::string sql = "INSERT INTO " + _table_name + " (name, user_id) "
-                          + "VALUES(?, ?);";
+                            + "VALUES(?, ?);";
         SQLite::Statement query = prepare(sql);
         query.bind(1, entity.getName());
         query.bind(2, entity.getUser()->getId());
 
-        return query.exec() > 0;
-    };
+        bool success = query.exec() > 0;
+
+        if (success)
+            entity.setId(static_cast<unsigned>(getLastInsertId()));
+
+        return success;
+    }
 
     bool ArtistRepository::update(const Artist& entity) {
         std::string sql =

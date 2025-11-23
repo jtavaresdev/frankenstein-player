@@ -1,4 +1,9 @@
 #include "core/services/Manager.hpp"
+#include "core/bd/DatabaseManager.hpp"
+#include "core/bd/RepositoryFactory.hpp"
+#include "core/entities/User.hpp"
+
+#include <iostream>
 
 namespace core
 {
@@ -6,7 +11,25 @@ namespace core
                      std::shared_ptr<SongRepository> songRepo,
                      std::shared_ptr<ArtistRepository> artistRepo,
                      std::shared_ptr<AlbumRepository> albumRepo)
-        : _config(config), _songRepo(songRepo), _artistRepo(artistRepo), _albumRepo(albumRepo), _usersManager(config) {}
+        : _config(config), _songRepo(songRepo), _artistRepo(artistRepo), _albumRepo(albumRepo), _usersManager(config) {
+            DatabaseManager db_manager(_config.databasePath(),
+                                           _config.databaseSchemaPath());
+
+            RepositoryFactory repo_factory(db_manager.getDatabase());
+            _songRepo = repo_factory.createSongRepository();
+            _artistRepo = repo_factory.createArtistRepository();
+            _albumRepo = repo_factory.createAlbumRepository();
+        }
+
+    Manager::Manager(ConfigManager &config) : _config(config), _usersManager(config) {
+            DatabaseManager db_manager(_config.databasePath(),
+                                            _config.databaseSchemaPath());
+
+            RepositoryFactory repo_factory(db_manager.getDatabase());
+            _songRepo = repo_factory.createSongRepository();
+            _artistRepo = repo_factory.createArtistRepository();
+            _albumRepo = repo_factory.createAlbumRepository();
+        }
 
     void Manager::move(std::string filePath, std::string newFilePath)
     {
@@ -18,11 +41,12 @@ namespace core
         fs::rename(source, destination);
     }
 
-    std::shared_ptr<Song> Manager::readMetadata(TagLib::FileRef file)
+    std::shared_ptr<Song> Manager::readMetadata(TagLib::FileRef file, User &user)
     {
         if (file.isNull() || !file.tag())
         {
-            std::cout << "Nenhum metadado encontrado" << std::endl;
+            // std::cout << "Nenhum metadado encontrado" << std::endl;
+            throw std::invalid_argument("Arquivo sem metadados");
         }
 
         TagLib::Tag *tag = file.tag();
@@ -32,14 +56,18 @@ namespace core
         song->setGenre(tag->genre().isEmpty() ? "Unknown Genre" : tag->genre().toCString());
         song->setYear(tag->year() == 0 ? 1900 : tag->year());
         // song->setDuration(file.audioProperties() ? file.audioProperties()->length() : 0);
+        song->setTrackNumber(tag->track() == 0 ? 1 : tag->track());
+        song->setUser(user);
 
         std::string artistName = tag->artist().isEmpty() ? "Unknown Artist" : tag->artist().toCString();
         std::vector<std::shared_ptr<Artist>> artists = _artistRepo->findByName(artistName);
         std::shared_ptr<Artist> artist;
 
+
         if (artists.empty())
         {
             artist = std::make_shared<Artist>(artistName, song->getGenre());
+            artist->setUser(user);
             _artistRepo->save(*artist);
         }
         else
@@ -67,10 +95,13 @@ namespace core
         {
             album = std::make_shared<Album>(albumTitle, artist, song->getGenre());
             album->setYear(song->getYear());
-            // album.setUser(song->getUser());
+            album->setUser(*song->getUser());
             _albumRepo->save(*album);
+            _albumRepo->setPrincipalArtist(*album, *artist, *song->getUser());
         }
         song->setAlbum(*album);
+        _songRepo->save(*song);
+        _songRepo->setPrincipalArtist(*song, *artist, *song->getUser());
 
         return song;
     }
@@ -96,9 +127,17 @@ namespace core
         verifyDir(publicInput);
 
         std::string inputDirs[] = {userInput, publicInput};
+        std::map<User, std::string> userInputMap = {
+            {*currentUser, userInput},
+            {*publicUser, publicInput}
+        };
 
-        for (const auto &inputDir : inputDirs)
+        // for (const auto &inputDir : inputDirs)
+        for (const auto &par : userInputMap)
         {
+            std::string inputDir = par.second;
+            User user = par.first;
+
             if (!fs::exists(inputDir))
             {
                 continue;
@@ -106,7 +145,7 @@ namespace core
 
             for (const auto &entry : fs::directory_iterator(inputDir))
             {
-                if (boost::filesystem::is_regular_file(entry.status()))
+                if (!boost::filesystem::is_regular_file(entry.status()))
                 {
                     continue;
                 }
@@ -122,9 +161,7 @@ namespace core
                 TagLib::FileRef f(filePath.c_str());
                 if (!f.isNull())
                 {
-
-                    std::shared_ptr<Song> song = readMetadata(f);
-                    _songRepo->save(*song);
+                    std::shared_ptr<Song> song = readMetadata(f, user);
 
                     move(filePath, song->getAudioFilePath());
                 }
@@ -144,6 +181,7 @@ namespace core
         verifyDir(publicInput);
 
         std::string inputDirs[] = {userInput, publicInput};
+
 
         for (const auto &dir : inputDirs)
         {

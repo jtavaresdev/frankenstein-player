@@ -67,5 +67,12 @@ public:
    * @return true se as entidades forem diferentes, false caso contrário
    */
   virtual bool operator!=(const Entity &other) const;
+
+  /**
+   * @brief Compara qual entidade é menor
+   * @param other Entidade a ser comparada
+   * @return true se a entidade atual for menor que a outra, false caso contrário
+   */
+    virtual bool operator<(const Entity &other) const;
 };
 } // namespace core

@@ -35,7 +35,7 @@ public:
         _test_media_env["TEST_ALBUM"] = "Test Album";
         _test_media_env["TEST_ARTIST"] = "The Testers";
 
-        _test_media_path = boost::filesystem::current_path().string() + "/tests/fixtures/media/";
+        _test_media_path = boost::filesystem::current_path().string() + "/../tests/fixtures/media/";
         _test_files = {
             _test_media_path + _test_media_env["SHORT_TEST_SONG"],
             _test_media_path + _test_media_env["MEDIUM_TEST_SONG"]

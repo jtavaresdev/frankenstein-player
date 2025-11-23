@@ -68,7 +68,7 @@ namespace core {
          * @param entity Entidade a ser inserida
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        virtual bool insert(const T& entity) override = 0;
+        virtual bool insert(T& entity) override = 0;
 
         /**
          * @brief Atualiza uma entidade existente no repositório

@@ -78,6 +78,11 @@ namespace core {
         _genre = genre;
     };
 
+    void Artist::setUser(const User &user) {
+        _user = std::make_shared<User>(user);
+        _user_id = user.getId();
+    };
+
     void Artist::addSong(const Song &song) {
         _songs.push_back(std::make_shared<Song>(song));
     };
@@ -342,7 +347,7 @@ namespace core {
     };
 
     std::shared_ptr<User> Artist::getUser() const {
-        return user;
+        return _user;
     };
 
     int Artist::calculateTotalDuration() {

@@ -14,7 +14,7 @@ namespace core {
     PlaylistRepository::PlaylistRepository(std::shared_ptr<SQLite::Database> db)
         : SQLiteRepositoryBase<Playlist>(db, "playlists") {}
 
-    bool PlaylistRepository::insert(const Playlist& entity) {
+    bool PlaylistRepository::insert(Playlist& entity) {
         SQLite::Statement query(*_db,
                                 "INSERT INTO playlists (title, user_id) "
                                 "VALUES (?, ?);");

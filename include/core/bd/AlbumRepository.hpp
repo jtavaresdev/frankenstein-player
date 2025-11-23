@@ -37,7 +37,7 @@ namespace core {
          * @param entity Album a ser inserido
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool insert(const Album &entity) override;
+        bool insert(Album &entity) override;
 
         /**
          * @brief Atualiza um album existente no repositório

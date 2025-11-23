@@ -7,6 +7,7 @@
 #include "core/bd/UserRepository.hpp"
 #include "core/entities/Artist.hpp"
 #include "core/entities/Song.hpp"
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -36,16 +37,29 @@ namespace core {
         : SQLiteRepositoryBase<Song>(db, "songs") {
     }
 
-    bool SongRepository::insert(const Song &entity) {
-        std::string sql = "INSERT INTO " + _table_name + " (title, duration, artist_id, user_id) " + "VALUES(?, ?, ?, ?);";
+    bool SongRepository::insert(Song &entity) {
+        std::string sql = "INSERT INTO " + _table_name + " (title, duration, track_number, artist_id, album_id, user_id) " + "VALUES(?, ?, ?, ?, ?, ?);";
+
+
 
         SQLite::Statement query = prepare(sql);
         query.bind(1, entity.getTitle());
         query.bind(2, entity.getDuration());
-        query.bind(3, entity.getArtist()->getId());
-        query.bind(4, entity.getUser()->getId());
+        query.bind(3, entity.getTrackNumber());
+        query.bind(4, entity.getArtist()->getId());
+        std::shared_ptr<const Album> album = entity.getAlbum();
+        if (album != nullptr)
+            query.bind(5, album->getId());
+        else
+            query.bind(5);
+        query.bind(6, entity.getUser()->getId());
 
-        return query.exec() > 0;
+        bool success = query.exec() > 0;
+
+        if (success)
+            entity.setId(static_cast<unsigned>(getLastInsertId()));
+
+        return success;
     };
 
     bool SongRepository::update(const Song &entity) {
@@ -267,7 +281,7 @@ namespace core {
         delete_query.bind(1, song.getId());
         delete_query.exec();
 
-        std::string insert_sql = "INSERT INTO song_artists (song_id, artist_id, user_id, is_principal) "
+        std::string insert_sql = "INSERT OR REPLACE INTO song_artists (song_id, artist_id, user_id, is_principal) "
                                  "VALUES (?, ?, ?, 1);";
         SQLite::Statement insert_query = prepare(insert_sql);
         insert_query.bind(1, song.getId());

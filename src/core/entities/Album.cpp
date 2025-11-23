@@ -1,4 +1,5 @@
 #include "core/entities/Album.hpp"
+#include "core/entities/Entity.hpp"
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include <cassert>
 #include <cstddef>
@@ -15,7 +16,7 @@ namespace core {
                  int year,
                  std::string genre,
                  unsigned user_id)
-        : _id(id), _user_id(0), _genre(""), _year(0) {
+        : Entity(id), _user_id(0), _genre(""), _year(0) {
 
         // Validações PRIMEIRO
         if (user_id == 0) {
@@ -42,7 +43,7 @@ namespace core {
                  std::shared_ptr<Artist> artist,
                  const std::string genre,
                  int year)
-        : _id(id), _name(name), _artist(artist), _genre(genre), _year(year) {};
+        : Entity(id), _name(name), _artist(artist), _genre(genre), _year(year) {};
 
     Album::~Album() = default;
 
@@ -115,6 +116,10 @@ namespace core {
 
     void Album::setYear(int year) {
         _year = year;
+    };
+
+    void Album::setUser(const User &user) {
+        _user = std::make_shared<User>(user);
     };
 
     void Album::setArtistLoader(
