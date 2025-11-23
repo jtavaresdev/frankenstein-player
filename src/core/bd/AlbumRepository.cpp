@@ -63,7 +63,16 @@ namespace core {
         std::string genre = query.getColumn("genre").getString();
         unsigned user_id = query.getColumn("user_id").getInt();
 
-        return std::make_shared<Album>(id, title, year, genre, user_id);
+        auto album = std::make_shared<Album>(id, title, year, genre, user_id);
+
+        auto artists_loader = [this, id]() -> std::vector<std::shared_ptr<Artist>> {
+            Album tempAlbum;
+            tempAlbum.setId(id);
+            return this->getFeaturingArtists(tempAlbum);
+        };
+
+        album->setFeaturingArtistsLoader(artists_loader);
+        return album;
     };
 
     bool AlbumRepository::save(Album &entity) {

@@ -1,6 +1,8 @@
 
 #include "core/entities/Song.hpp"
 #include "core/bd/ArtistRepository.hpp"
+#include "core/bd/SongRepository.hpp"
+#include "core/entities/Album.hpp"
 #include "core/entities/Artist.hpp"
 #include "core/entities/Entity.hpp"
 #include "core/entities/User.hpp"
@@ -70,9 +72,20 @@ namespace core {
         return _featuring_artists_ids;
     };
 
-    std::vector<std::shared_ptr<const Artist>> getFeaturingArtists() {
-        // TODO.
-        return std::vector<std::shared_ptr<const Artist>>();
+    std::vector<std::shared_ptr<const Artist>> Song::getFeaturingArtists() {
+        if (featuringArtistsLoader) {
+            auto allArtists = featuringArtistsLoader();
+            std::vector<std::shared_ptr<const Artist>> featuring;
+
+            if (allArtists.size() > 1) {
+                for (auto it = allArtists.begin(); it != allArtists.end(); ++it) {
+                    featuring.push_back(std::const_pointer_cast<const Artist>(*it));
+                }
+            }
+
+            return featuring;
+        }
+        return {};
     };
 
     std::shared_ptr<const Album> Song::getAlbum() const {
@@ -183,6 +196,10 @@ namespace core {
     void Song::setTrackNumber(unsigned track_number) {
         _track_number = track_number;
     };
+
+    void Song::setDuration(int sec) {
+        _duration = sec;
+    }
 
     std::string Song::getFormattedDuration() const {
         int totalSeconds = getDuration();
