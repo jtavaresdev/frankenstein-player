@@ -60,16 +60,23 @@ namespace core {
         return query.exec() > 0;
     };
 
-    std::shared_ptr<Song>
-    SongRepository::mapRowToEntity(SQLite::Statement &query) const {
+    std::shared_ptr<Song> SongRepository::mapRowToEntity(SQLite::Statement &query) const {
         unsigned id = query.getColumn("id").getInt();
         std::string title = query.getColumn("title").getString();
         unsigned artist_id = query.getColumn("artist_id").getInt();
         unsigned user_id = query.getColumn("user_id").getInt();
 
-        // TODO repensar implementação dos contrutores de Song
+        auto song = std::make_shared<Song>(id, title, artist_id, user_id);
 
-        return std::make_shared<Song>(id, title, artist_id, user_id);
+        auto artistsLoader = [this, id]() -> std::vector<std::shared_ptr<Artist>> {
+            Song tempSong;
+            tempSong.setId(id);
+            return this->getFeaturingArtists(tempSong);
+        };
+
+        song->setFeaturingArtistsLoader(artistsLoader);
+
+        return song;
     }
     bool SongRepository::save(Song &entity) {
         if (entity.getId() == 0) {
