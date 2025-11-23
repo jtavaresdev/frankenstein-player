@@ -233,9 +233,11 @@ namespace core {
     };
 
     std::string Song::getAudioFilePath() const {
-        if (_file_path.empty()) {
-            throw std::invalid_argument("Song não possui caminho de arquivo definido");
-        }
+        // TODO
+
+        // if (_file_path.empty()) {
+        //     throw std::invalid_argument("Song não possui caminho de arquivo definido");
+        //  }
 
         return _user.getHomePath() + "/" + getArtist()->getName() + "/" +
                getAlbum()->getName() + "/" + getTitle() + ".mp3";
