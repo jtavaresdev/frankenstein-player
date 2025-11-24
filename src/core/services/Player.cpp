@@ -26,17 +26,8 @@ namespace core {
         _audioInitialized = true;
         std::cout << "Audio engine inicializado" << std::endl;
 
-        ma_sound_config soundConfig = ma_sound_config_init();
-        // TODO
-        soundConfig.pFilePath = "";
-        result = ma_sound_init_ex(&_audioEngine, &soundConfig, &_currentSound);
-        if (result != MA_SUCCESS) {
-            ma_engine_uninit(&_audioEngine);
-            _audioInitialized = false;
-            throw std::runtime_error("Falha ao iniciar ma_sound: " + std::to_string(result));
-        }
+        memset(&_currentSound, 0, sizeof(_currentSound));
     }
-
     Player::Player(const core::PlaybackQueue &tracks) : Player() {
         addPlaybackQueue(tracks);
     }
@@ -47,7 +38,6 @@ namespace core {
             ma_engine_uninit(&_audioEngine);
         }
     }
-
     std::shared_ptr<PlaybackQueue> Player::getCurrentQueue() const {
         if (_currentQueueIndex >= 0 && static_cast<size_t>(_currentQueueIndex) < _queue.size()) {
             return _queue[_currentQueueIndex];
@@ -69,7 +59,7 @@ namespace core {
         }
 
         auto currentQueue = getCurrentQueue();
-        if (!currentQueue || _currentSongIndex < 0 || static_cast<size_t>(_currentQueueIndex) >= currentQueue->size()) {
+        if (!currentQueue || _currentSongIndex < 0 || static_cast<size_t>(_currentSongIndex) >= currentQueue->size()) {
             throw std::runtime_error("Index Song invalido");
         }
 
@@ -79,33 +69,37 @@ namespace core {
         if (!_currentSong) {
             throw std::runtime_error("Current song é null");
         }
-        // TODO logica e filepath no construtor de BD
+
         std::string filePath = _currentSong->getFilePath();
+
+        if (filePath.empty()) {
+            throw std::runtime_error("Caminho do arquivo vazio");
+        }
 
         ma_result result = ma_sound_init_from_file(&_audioEngine, filePath.c_str(), 0, NULL, NULL, &_currentSound);
 
         if (result != MA_SUCCESS) {
-            std::cerr << "Failed to load sound: " << filePath << std::endl;
+            std::cerr << "Failed to load sound: " << filePath << " - Error: " << result << std::endl;
             throw std::runtime_error("Falha ao carregar sound do path: " + filePath);
         }
 
-        // Configurar callback para quando o som terminar
         ma_sound_set_end_callback(&_currentSound, sound_end_callback, this);
 
-        // Configurar volume
         ma_sound_set_volume(&_currentSound, _volume);
 
-        // Configurar looping se necessário
         ma_sound_set_looping(&_currentSound, _isLooping);
 
         return true;
     }
 
     void Player::cleanupCurrentSound() {
-        if (ma_sound_is_playing(&_currentSound)) {
-            ma_sound_stop(&_currentSound);
+        if (_currentSound.pDataSource != nullptr) {
+            if (ma_sound_is_playing(&_currentSound)) {
+                ma_sound_stop(&_currentSound);
+            }
+            ma_sound_uninit(&_currentSound);
+            memset(&_currentSound, 0, sizeof(_currentSound));
         }
-        ma_sound_uninit(&_currentSound);
     }
     void Player::addPlaybackQueue(const core::PlaybackQueue &tracks) {
         if (tracks.empty()) {
