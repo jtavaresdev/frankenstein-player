@@ -293,7 +293,7 @@ namespace cli
      * @brief Destrutor de um objeto Cli
      *
      */
-    ~Cli();
+    ~Cli() = default;
 
     /**
      * @brief Inicia o um loop que recebe comandos do usuário e os processa.
