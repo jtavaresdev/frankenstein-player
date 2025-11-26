@@ -1,4 +1,9 @@
 #include "core/services/Manager.hpp"
+#include "core/bd/DatabaseManager.hpp"
+#include "core/bd/RepositoryFactory.hpp"
+#include "core/entities/User.hpp"
+
+#include <iostream>
 
 namespace core
 {
@@ -6,23 +11,61 @@ namespace core
                      std::shared_ptr<SongRepository> songRepo,
                      std::shared_ptr<ArtistRepository> artistRepo,
                      std::shared_ptr<AlbumRepository> albumRepo)
-        : _config(config), _songRepo(songRepo), _artistRepo(artistRepo), _albumRepo(albumRepo), _usersManager(config) {}
+        : _config(config), _songRepo(songRepo), _artistRepo(artistRepo), _albumRepo(albumRepo), _usersManager(config) {
+            DatabaseManager db_manager(_config.databasePath(),
+                                           _config.databaseSchemaPath());
+
+            RepositoryFactory repo_factory(db_manager.getDatabase());
+            _songRepo = repo_factory.createSongRepository();
+            _artistRepo = repo_factory.createArtistRepository();
+            _albumRepo = repo_factory.createAlbumRepository();
+        }
+
+    Manager::Manager(ConfigManager &config) : _config(config), _usersManager(config) {
+            DatabaseManager db_manager(_config.databasePath(),
+                                            _config.databaseSchemaPath());
+
+            RepositoryFactory repo_factory(db_manager.getDatabase());
+            _songRepo = repo_factory.createSongRepository();
+            _artistRepo = repo_factory.createArtistRepository();
+            _albumRepo = repo_factory.createAlbumRepository();
+        }
+
+    std::string Manager::cleanString(const std::string& str)
+    {
+        auto begin = std::find_if_not(str.begin(), str.end(),
+                                        [](unsigned char ch){ return std::isspace(ch); });
+    
+        auto end = std::find_if_not(str.rbegin(), str.rend(),
+                                    [](unsigned char ch){ return std::isspace(ch); }).base();
+    
+        if (begin >= end)
+            return "";
+    
+        return std::string(begin, end);
+    }
 
     void Manager::move(std::string filePath, std::string newFilePath)
     {
         fs::path source(filePath);
         fs::path destination(newFilePath);
-
-        fs::create_directories(destination.parent_path());
-
-        fs::rename(source, destination);
+        try {
+            fs::create_directories(destination.parent_path());
+        
+            fs::rename(source, destination);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Erro ao mover arquivo de '" << source.string() << "' para '" << destination.string() << "': " << e.what() << std::endl;
+        }
     }
 
-    std::shared_ptr<Song> Manager::readMetadata(TagLib::FileRef file)
+    std::shared_ptr<Song> Manager::readMetadata(TagLib::FileRef file, User &user)
     {
         if (file.isNull() || !file.tag())
         {
-            std::cout << "Nenhum metadado encontrado" << std::endl;
+            // std::cout << "Nenhum metadado encontrado" << std::endl;
+            throw std::invalid_argument("Arquivo sem metadados");
         }
 
         TagLib::Tag *tag = file.tag();
@@ -31,30 +74,62 @@ namespace core
         song->setTitle(tag->title().isEmpty() ? "Unknown Title" : tag->title().toCString());
         song->setGenre(tag->genre().isEmpty() ? "Unknown Genre" : tag->genre().toCString());
         song->setYear(tag->year() == 0 ? 1900 : tag->year());
-        // song->setDuration(file.audioProperties() ? file.audioProperties()->length() : 0);
+        song->setTrackNumber(tag->track() == 0 ? 1 : tag->track());
+        song->setUser(user);
+        song->setDuration(file.audioProperties() ? file.audioProperties()->length() : 0);
 
-        std::string artistName = tag->artist().isEmpty() ? "Unknown Artist" : tag->artist().toCString();
-        std::vector<std::shared_ptr<Artist>> artists = _artistRepo->findByName(artistName);
+
+        std::string artistNames = tag->artist().isEmpty() ? "Unknown Artist" : tag->artist().toCString();
+
+        const std::vector<std::string> separators = {
+            " / ", "/", ";", ","
+        };
+
+        for (const auto& sep : separators) {
+            size_t pos = 0;
+            while ((pos = artistNames.find(sep, pos)) != std::string::npos) {
+                artistNames.replace(pos, sep.length(), "/");
+                pos += 1;
+            }
+        }
+
+        std::stringstream ss(artistNames);
+        std::string artistName;
+        std::vector<std::shared_ptr<Artist>> featuring;
+        bool mainArtistNotDefined = false;
+
         std::shared_ptr<Artist> artist;
+        while(std::getline(ss, artistName, '/')) {
+            artistName = cleanString(artistName);
+            std::vector<std::shared_ptr<Artist>> artists = _artistRepo->findByName(artistName);
+            
+            if (artists.empty())
+            {
+                artist = std::make_shared<Artist>(artistName, song->getGenre());
+                artist->setUser(user);
+                _artistRepo->save(*artist);
+            }
+            else
+            {
+                artist = artists[0];
+            }
 
-        if (artists.empty())
-        {
-            artist = std::make_shared<Artist>(artistName, song->getGenre());
-            _artistRepo->save(*artist);
+            if(!mainArtistNotDefined) {
+                song->setArtist(artist);
+                mainArtistNotDefined = true;
+            } else {
+                featuring.push_back(artist);
+            }
+            
         }
-        else
-        {
-            artist = artists[0];
-        }
-        song->setArtist(artist);
+        
 
         std::string albumTitle = tag->album().isEmpty() ? "Singles" : tag->album().toCString();
         std::vector<std::shared_ptr<Album>> albums = _albumRepo->findByArtist(artistName);
         std::shared_ptr<Album> album;
 
         bool albumFound = false;
-        for (const std::shared_ptr<Album> &existingAlbum : albums)
-        {
+        for (const std::shared_ptr<Album> &existingAlbum : albums) {
             if (existingAlbum->getName() == albumTitle)
             {
                 album = existingAlbum;
@@ -67,10 +142,17 @@ namespace core
         {
             album = std::make_shared<Album>(albumTitle, artist, song->getGenre());
             album->setYear(song->getYear());
-            // album.setUser(song->getUser());
+            album->setUser(*song->getUser());
             _albumRepo->save(*album);
+            _albumRepo->setPrincipalArtist(*album, *artist, *song->getUser());
         }
         song->setAlbum(*album);
+        _songRepo->save(*song);
+        _songRepo->setPrincipalArtist(*song, *artist, *song->getUser());
+
+        for(auto feat : featuring) {
+            _songRepo->addFeaturingArtist(*song, *feat, user);
+        }
 
         return song;
     }
@@ -80,7 +162,13 @@ namespace core
         fs::path dir(path);
         if (!fs::exists(dir))
         {
-            fs::create_directories(dir);
+            try {
+                fs::create_directories(dir);
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "Erro ao criar diretório '" << dir.string() << "': " << e.what() << std::endl;
+            }
         }
     }
 
@@ -96,9 +184,17 @@ namespace core
         verifyDir(publicInput);
 
         std::string inputDirs[] = {userInput, publicInput};
+        std::map<User, std::string> userInputMap = {
+            {*currentUser, userInput},
+            {*publicUser, publicInput}
+        };
 
-        for (const auto &inputDir : inputDirs)
+        // for (const auto &inputDir : inputDirs)
+        for (const auto &par : userInputMap)
         {
+            std::string inputDir = par.second;
+            User user = par.first;
+
             if (!fs::exists(inputDir))
             {
                 continue;
@@ -106,7 +202,7 @@ namespace core
 
             for (const auto &entry : fs::directory_iterator(inputDir))
             {
-                if (boost::filesystem::is_regular_file(entry.status()))
+                if (!boost::filesystem::is_regular_file(entry.status()))
                 {
                     continue;
                 }
@@ -123,10 +219,22 @@ namespace core
                 if (!f.isNull())
                 {
 
-                    std::shared_ptr<Song> song = readMetadata(f);
-                    _songRepo->save(*song);
+                    std::shared_ptr<Song> song;
+                    try {
+                        song = readMetadata(f, user);
+                        _songRepo->save(*song);
 
-                    move(filePath, song->getAudioFilePath());
+                        if (!song) {
+                                std::cerr << "Metadados insuficientes para arquivo '" << filePath << "', pulando." << std::endl;
+                                continue;
+                            }
+                        move(filePath, song->getAudioFilePath());
+                    }
+                    catch (const std::exception &e)
+                    {
+                        std::cerr << "Erro ao processar o arquivo '" << filePath << "': " << e.what() << std::endl;
+                        continue;
+                    }
                 }
             }
         }
@@ -144,6 +252,7 @@ namespace core
         verifyDir(publicInput);
 
         std::string inputDirs[] = {userInput, publicInput};
+
 
         for (const auto &dir : inputDirs)
         {

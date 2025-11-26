@@ -32,7 +32,7 @@ namespace core {
          * @param entity Usuario a ser inserido
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool insert(const User& entity) override;
+        bool insert(User& entity) override;
 
         /**
          * @brief Atualiza um usuario existente no repositório

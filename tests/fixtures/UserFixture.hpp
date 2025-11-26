@@ -2,7 +2,6 @@
 
 #include <string>
 #include <map>
-#include <memory>
 #include <boost/filesystem.hpp>
 
 #include "core/entities/User.hpp"
@@ -58,4 +57,4 @@ class UserFixture {
     const std::string getBaseTestPath() const {
         return _base_test_path;
     }
-};
+};;

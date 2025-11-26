@@ -26,7 +26,7 @@ namespace core {
               db,
               "playback_history") {}
 
-    bool HistoryPlaybackRepository::insert(const HistoryPlayback& entity) {
+    bool HistoryPlaybackRepository::insert(HistoryPlayback& entity) {
         std::string sql =
             "INSERT INTO " + _table_name +
             " (user_id, song_id, played_at) "
@@ -99,14 +99,14 @@ namespace core {
         return results;
     }
 
-    bool HistoryPlaybackRepository::insertHistoryPlayback(const HistoryPlayback& entity) {
+    bool HistoryPlaybackRepository::insertHistoryPlayback(HistoryPlayback& entity) {
         return insert(entity);
     }
 
     bool HistoryPlaybackRepository::insertMultipleHistoryPlaybacks(
-        const std::vector<HistoryPlayback>& entities) {
+        std::vector<HistoryPlayback>& entities) {
         bool all_inserted = true;
-        for (const auto& entity : entities) {
+        for (auto& entity : entities) {
             if (!insert(entity))
                 all_inserted = false;
         }

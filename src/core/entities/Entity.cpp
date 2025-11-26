@@ -35,4 +35,8 @@ namespace core {
     bool Entity::operator!=(const Entity& other) const {
         return !(*this == other);
     }
+
+    bool Entity::operator<(const Entity& other) const {
+        return this->getId() < other.getId();
+    }
 }  // namespace core

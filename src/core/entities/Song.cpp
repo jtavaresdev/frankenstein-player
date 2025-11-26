@@ -1,13 +1,17 @@
 
 #include "core/entities/Song.hpp"
 #include "core/bd/ArtistRepository.hpp"
+#include "core/bd/SongRepository.hpp"
+#include "core/entities/Album.hpp"
 #include "core/entities/Artist.hpp"
+#include "core/entities/Entity.hpp"
 #include "core/entities/User.hpp"
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include <cassert>
 #include <memory>
 #include <miniaudio.h>
 #include <stdexcept>
+#include <string>
 #include <taglib/fileref.h>
 #include <taglib/tag.h>
 #include <taglib/tpropertymap.h>
@@ -27,7 +31,7 @@ namespace core {
                std::string file_path,
                std::string title,
                unsigned artist_id)
-        : _id(id),
+        : Entity(id),
           _file_path(std::move(file_path)),
           _title(std::move(title)),
           _artist_id(artist_id) {};
@@ -36,7 +40,7 @@ namespace core {
                const std::string &title,
                unsigned &artist,
                unsigned &user_id)
-        : _id(id),
+        : Entity(id),
           _title(title),
           _artist_id(artist),
           user_id(user_id)
@@ -69,9 +73,20 @@ namespace core {
         return _featuring_artists_ids;
     };
 
-    std::vector<std::shared_ptr<const Artist>> getFeaturingArtists() {
-        // TODO.
-        return std::vector<std::shared_ptr<const Artist>>();
+    std::vector<std::shared_ptr<const Artist>> Song::getFeaturingArtists() {
+        if (featuringArtistsLoader) {
+            auto allArtists = featuringArtistsLoader();
+            std::vector<std::shared_ptr<const Artist>> featuring;
+
+            if (allArtists.size() > 1) {
+                for (auto it = allArtists.begin(); it != allArtists.end(); ++it) {
+                    featuring.push_back(std::const_pointer_cast<const Artist>(*it));
+                }
+            }
+
+            return featuring;
+        }
+        return {};
     };
 
     std::shared_ptr<const Album> Song::getAlbum() const {
@@ -83,7 +98,7 @@ namespace core {
             return _duration;
         }
 
-        if (_file_path.empty()) {
+        if (getAudioFilePath().empty()) {
             throw std::runtime_error("Caminho do arquivo está vazio para a música: " + _title);
         }
         try {
@@ -113,6 +128,10 @@ namespace core {
         return _year;
     };
 
+    unsigned Song::getTrackNumber() const {
+        return _track_number;
+    };
+
     std::shared_ptr<User> Song::getUser() const {
         return std::make_shared<User>(_user);
     };
@@ -123,8 +142,9 @@ namespace core {
         // pensei em que musicar ter um vector de shared_ptr(user) para que uma
         // musica ser compartilhada
         // User seria por Usuarios do computador
-        auto id = user.getId();
-        _user.setId(id);
+        // auto id = user.getId();
+        // _user.setId(id);
+        _user = user;
     };
 
     void Song::setTitle(const std::string &title) {
@@ -174,6 +194,14 @@ namespace core {
         _year = year;
     };
 
+    void Song::setTrackNumber(unsigned track_number) {
+        _track_number = track_number;
+    };
+
+    void Song::setDuration(int sec) {
+        _duration = sec;
+    }
+
     std::string Song::getFormattedDuration() const {
         int totalSeconds = getDuration();
         int h = totalSeconds / 3600;
@@ -220,11 +248,13 @@ namespace core {
     };
 
     std::string Song::getAudioFilePath() const {
-        if (_file_path.empty()) {
-            throw std::invalid_argument("Song não possui caminho de arquivo definido");
-        }
+        std::string path = _user.getHomePath() + "/" + getArtist()->getName() + "/";
+        if (getAlbum())
+            path += getAlbum()->getName() + "/";
+        else
+            path += "Singles/";
+        path += getTitle() + ".mp3";
 
-        return _user.getHomePath() + "/" + getArtist()->getName() + "/" +
-               getAlbum()->getName() + "/" + getTitle() + ".mp3";
+        return path;
     };
 } // namespace core

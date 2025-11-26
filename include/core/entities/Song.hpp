@@ -25,6 +25,7 @@ namespace core {
     // Forward declaration
     class Album;
     class Artist;
+    class SongRepository;
 
     /**
      * @class Song
@@ -39,7 +40,6 @@ namespace core {
                  public core::IPlayable,
                  public core::IPlayableObject {
     private:
-        unsigned _id;
         std::string _file_path;
         std::string _title;
         unsigned _artist_id;
@@ -52,6 +52,7 @@ namespace core {
         int _duration;
         std::string _genre;
         int _year;
+        unsigned _track_number;
         bool _metadata_loaded;
         ma_decoder_config decoderConfig;
 
@@ -143,6 +144,7 @@ namespace core {
          * colaboradores
          */
         std::vector<std::shared_ptr<const Artist>> getFeaturingArtists();
+
         /**
          * @brief Obtém o álbum
          * @return Nome do álbum
@@ -153,6 +155,11 @@ namespace core {
          * @return Duração em segundos
          */
         int getDuration() const;
+        /**
+         * @brief Obtém o número da faixa no album
+         * @return Número da faixa
+         */
+        unsigned getTrackNumber() const;
         /**
          * @brief Obtém o gênero
          * @return Gênero musical
@@ -184,7 +191,11 @@ namespace core {
          * @param artist Novo artista
          */
         void setArtist(std::shared_ptr<Artist> &artist);
-
+        /**
+         * @brief Define o número da faixa no álbum
+         * @param track_number Novo número da faixa
+         */
+        void setTrackNumber(unsigned track_number);
         /*
          * @brief Adciona um artista feat a musica
          * @param artist Artista  a ser adicionado
@@ -234,6 +245,8 @@ namespace core {
          * @param year Novo ano
          */
         void setYear(int year);
+
+        void setDuration(int sec);
         // Métodos
 
         /**

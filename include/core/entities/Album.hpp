@@ -18,14 +18,17 @@
 #include <string>
 #include <vector>
 
+#include "core/bd/AlbumRepository.hpp"
 #include "core/entities/Artist.hpp"
 #include "core/entities/Entity.hpp"
 #include "core/entities/Song.hpp"
+#include "core/entities/User.hpp"
 #include "core/interfaces/ICollection.hpp"
 #include "core/interfaces/IPlayable.hpp"
 
 namespace core {
-
+    // forward declaration
+    class AlbumRepository;
     /**
      * @class Album
      * @brief Representa um álbum musical com suas músicas
@@ -39,7 +42,6 @@ namespace core {
                   public ICollection,
                   public IPlayableObject {
     private:
-        unsigned _id;
         std::string _file_path;
         std::string _name;
         unsigned _artist_id;
@@ -110,6 +112,7 @@ namespace core {
          * @return shared_ptr<User>
          */
         std::shared_ptr<User> getUser() const;
+
         /**
          * @brief Obtém o artista do álbum
          * @return Nome do artista/banda
@@ -175,6 +178,12 @@ namespace core {
         void setYear(int year);
 
         /**
+         * @brief Define o usuário associado ao álbum
+         * @param user Ponteiro compartilhado para o usuário
+         */
+        void setUser(const User &user);
+
+        /**
          * @brief Define a função para carregar o artista do álbum
          * @param loader Função que retorna um ponteiro compartilhado para o
          * artista
@@ -191,6 +200,8 @@ namespace core {
         void setFeaturingArtistsLoader(
             const std::function<std::vector<std::shared_ptr<Artist>>()> &
                 loader);
+
+        void setUser(std::shared_ptr<User> user);
 
         /**
          * @brief Obtém informações do álbum em formato de string
@@ -226,13 +237,6 @@ namespace core {
          * @return Caminho do arquivo de áudio
          */
         std::string getAudioFilePath() const override;
-
-        /**
-         * @brief Obtém um vetor com todas as músicas do álbum
-         * @return Vetor de ponteiros compartilhados para IPlayable contendo
-         * todas as músicas
-         */
-        std::vector<std::shared_ptr<IPlayable>> getSongs();
 
         /**
          * @brief Define a função de carregamento para as músicas do álbum

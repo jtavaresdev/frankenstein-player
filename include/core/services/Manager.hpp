@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "core/entities/User.hpp"
 #include "core/interfaces/IPlayable.hpp"
 #include "core/bd/SongRepository.hpp"
 #include "core/bd/ArtistRepository.hpp"
@@ -16,8 +17,10 @@
 #include "core/services/ConfigManager.hpp"
 #include "core/services/UsersManager.hpp"
 
+#include <exception>
 #include <boost/filesystem.hpp>
 #include <memory>
+#include <sstream>
 #ifdef _WIN32
     #include <taglib/tag.h>
     #include <taglib/fileref.h>
@@ -58,7 +61,7 @@ namespace core {
          * @return Retorna uma instância do objeto com os dados de título, artista e path tratados
          *
          */
-        std::shared_ptr<Song> readMetadata(TagLib::FileRef file);
+        std::shared_ptr<Song> readMetadata(TagLib::FileRef file, User &user);
 
         /**
          * @brief Verifica ou cria o diretório antes de salvar uma música
@@ -66,6 +69,12 @@ namespace core {
          * Verifica se um diretório existe e caso não exista cria o diretório
          */
         void verifyDir(std::string path);
+
+        /**
+         * @brief Retira os espaços do inicio e do fim
+         * 
+         */
+        std::string cleanString(const std::string& str);
 
     public:
 
@@ -80,6 +89,8 @@ namespace core {
                 std::shared_ptr<SongRepository> songRepo,
                 std::shared_ptr<ArtistRepository> artistRepo,
                 std::shared_ptr<AlbumRepository> albumRepo);
+
+        Manager(ConfigManager &config);
 
         /***
          * @brief Atualiza toda a organização das músicas com base no diretório temporário

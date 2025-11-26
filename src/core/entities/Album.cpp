@@ -1,4 +1,7 @@
 #include "core/entities/Album.hpp"
+#include "core/entities/Entity.hpp"
+#include "core/bd/ArtistRepository.hpp"
+#include "core/entities/Artist.hpp"
 #include <boost/smart_ptr/intrusive_ptr.hpp>
 #include <cassert>
 #include <cstddef>
@@ -15,7 +18,7 @@ namespace core {
                  int year,
                  std::string genre,
                  unsigned user_id)
-        : _id(id), _user_id(0), _genre(""), _year(0) {
+        : Entity(id), _user_id(0), _genre(""), _year(0) {
 
         // Validações PRIMEIRO
         if (user_id == 0) {
@@ -42,7 +45,7 @@ namespace core {
                  std::shared_ptr<Artist> artist,
                  const std::string genre,
                  int year)
-        : _id(id), _name(name), _artist(artist), _genre(genre), _year(year) {};
+        : Entity(id), _name(name), _artist(artist), _genre(genre), _year(year) {};
 
     Album::~Album() = default;
 
@@ -65,8 +68,19 @@ namespace core {
 
     std::vector<std::shared_ptr<const Artist>>
     Album::getFeaturingArtists() const {
-        // TODO
-        return std::vector<std::shared_ptr<const Artist>>();
+        if (featuringArtistsLoader) {
+            auto allArtists = featuringArtistsLoader();
+            std::vector<std::shared_ptr<const Artist>> featuring;
+
+            if (allArtists.size() > 1) {
+                for (auto it = allArtists.begin(); it != allArtists.end(); ++it) {
+                    featuring.push_back(std::const_pointer_cast<const Artist>(*it));
+                }
+            }
+
+            return featuring;
+        }
+        return {};
     };
 
     std::string Album::getGenre() const {
@@ -117,6 +131,10 @@ namespace core {
         _year = year;
     };
 
+    void Album::setUser(const User &user) {
+        _user = std::make_shared<User>(user);
+    };
+
     void Album::setArtistLoader(
         const std::function<std::shared_ptr<Artist>()> &loader) {
         if (!loader) {
@@ -132,6 +150,10 @@ namespace core {
         }
         featuringArtistsLoader = loader;
     };
+
+    void Album::setUser(std::shared_ptr<User> user) {
+        _user = user;
+    }
 
     std::string Album::toString() const {
         std::string info = "{Album: " + _name + ", Artista: " + _artist->getName() + ", Ano: " + std::to_string(_year) + "}";
@@ -180,7 +202,6 @@ namespace core {
 
     std::vector<std::shared_ptr<Song>> Album::getSongs() const {
         std::vector<std::shared_ptr<Song>> vector;
-
         for (auto const &s : _songs) {
             vector.push_back(s);
         }
@@ -321,4 +342,5 @@ namespace core {
         }
         return _songs.at(static_cast<size_t>(index));
     };
+
 } // namespace core

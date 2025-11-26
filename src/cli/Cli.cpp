@@ -11,6 +11,7 @@
 #include "cli/Cli.hpp"
 #include <fstream>
 #include <iomanip>
+#include "core/bd/DatabaseManager.hpp"
 
 namespace cli
 {
@@ -27,11 +28,12 @@ namespace cli
         return str.substr(firstNonSpace);
     }
 
-    Cli::Cli(core::ConfigManager &config_manager)
+    Cli::Cli(core::ConfigManager &config_manager) : _config(config_manager)
     {
         try
         {
-            _db = std::make_shared<SQLite::Database>(config_manager.databasePath(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+            // _db = std::make_shared<SQLite::Database>(config_manager.databasePath(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+            _db_manager = core::DatabaseManager(config_manager.databasePath(), config_manager.databaseSchemaPath());
         }
         catch (const std::exception &e)
         {
@@ -240,8 +242,9 @@ namespace cli
         {
             core::RepositoryFactory repo_factory(_db);
 
-            auto tracks = core::PlaybackQueue(_user, playabel, repo_factory.createHistoryPlaybackRepository());
-            _player->addPlaybackQueue(tracks);
+            // auto tracks = core::PlaybackQueue(_user, playabel, repo_factory.createHistoryPlaybackRepository());
+            // _player->addPlaybackQueue(tracks);
+            _player->getPlaybackQueue()->add(playabel);
             std::cout << "Adicionado à fila de reprodução." << std::endl;
         }
         catch (const std::exception &e)
@@ -252,9 +255,18 @@ namespace cli
 
     void Cli::showQueue() const
     {
-        auto queue = _player->getCurrentQueue();
-        std::cout << "Fila de reprodução: \n"
-                  << queue->toString();
+        auto queue = _player->getPlaybackQueue();
+        // std::cout << "Fila de reprodução: \n"
+        //           << queue->toString();
+        std::cout << "Fila de reprodução detalhada: \n";
+        for (size_t i = 0; i < queue->size(); ++i)
+        {
+            auto song = queue->at(i);
+            if (song)
+            {
+                std::cout << i + 1 << ". " << song->getTitle() << " - " << song->getArtist()->getName() << "\n";
+            }
+        }
     }
 
     void Cli::like()

@@ -16,16 +16,24 @@
 #include "fixtures/DatabaseFixture.hpp"
 #include "fixtures/MediaFixture.hpp"
 
+#ifdef _WIN32
+    std::string uid1001 = "1001";
+    std::string uid1002 = "1002";
+#else
+    uid_t uid1001 = 1001;
+    uid_t uid1002 = 1002;
+#endif
+
 TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
     ConfigFixture config = ConfigFixture();
     MediaFixture media = MediaFixture();
     core::RepositoryFactory repo_factory(DatabaseFixture().getDatabase());
 
-    std::unique_ptr<core::SongRepository> song_repo =
+    std::shared_ptr<core::SongRepository> song_repo =
         repo_factory.createSongRepository();
-    std::unique_ptr<core::ArtistRepository> artist_repo =
+    std::shared_ptr<core::ArtistRepository> artist_repo =
         repo_factory.createArtistRepository();
-    std::unique_ptr<core::AlbumRepository> album_repo =
+    std::shared_ptr<core::AlbumRepository> album_repo =
         repo_factory.createAlbumRepository();
     std::unique_ptr<core::UserRepository> user_repo =
         repo_factory.createUserRepository();
@@ -54,14 +62,14 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
         boost::filesystem::remove_all(config.userMusicDirectory());
     }
 
-    core::Manager manager(config, song_repo.get(), artist_repo.get(), album_repo.get(), user_repo.get());
+    core::Manager manager(config, song_repo, artist_repo, album_repo);
 
     TEST_CASE("CT-AC-01: Adicionar e organizar um album") {
         SUBCASE("Organizar um álbum") {
             core::User user("usertest1",
                             config.userMusicDirectory(),
                             config.inputPublicPath(),
-                            1001);
+                            uid1001);
             user_repo->save(user);
 
             auto song_mock1 =
@@ -94,7 +102,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             core::User user("usertest1",
                             config.userMusicDirectory(),
                             config.inputPublicPath(),
-                            1001);
+                            uid1001);
             user_repo->save(user);
 
             auto song_mock1 =
@@ -136,12 +144,12 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             core::User user1("usertest1",
                              config.userMusicDirectory(),
                              config.inputPublicPath(),
-                             1001);
+                             uid1001);
 
             core::User user2("usertest2",
                              config.userMusicDirectory(),
                              config.inputPublicPath(),
-                             1002);
+                             uid1002);
 
             user_repo->save(user1);
             user_repo->save(user2);
@@ -208,7 +216,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             core::User user("usertest1",
                             config.userMusicDirectory(),
                             config.inputPublicPath(),
-                            1001);
+                            uid1001);
             user_repo->save(user);
 
             CHECK_NOTHROW(manager.update());
@@ -222,7 +230,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             core::User user("usertest1",
                             config.userMusicDirectory(),
                             config.inputPublicPath(),
-                            1001);
+                            uid1001);
             user_repo->save(user);
 
             const MediaFixture::SongTestMock song_mock =
@@ -246,7 +254,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             core::User user("usertest1",
                             config.userMusicDirectory(),
                             config.inputPublicPath(),
-                            1001);
+                            uid1001);
             user_repo->save(user);
 
             const auto song_mock1 =
@@ -278,7 +286,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             core::User user("usertest1",
                             config.userMusicDirectory(),
                             config.inputPublicPath(),
-                            1001);
+                            uid1001);
             user_repo->save(user);
 
             const MediaFixture::SongTestMock song_mock =
@@ -308,7 +316,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             core::User user("usertest1",
                             config.userMusicDirectory(),
                             config.inputPublicPath(),
-                            1001);
+                            uid1001);
             user_repo->save(user);
 
             const MediaFixture::SongTestMock song_mock =
@@ -336,7 +344,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             core::User user("usertest1",
                             config.userMusicDirectory(),
                             config.inputPublicPath(),
-                            1001);
+                            uid1001);
             user_repo->save(user);
 
             const MediaFixture::SongTestMock song_mock =
@@ -380,12 +388,12 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             core::User user1("usertest1",
                              config.userMusicDirectory(),
                              config.inputPublicPath(),
-                             1001);
+                             uid1001);
 
             core::User user2("usertest2",
                              config.userMusicDirectory(),
                              config.inputPublicPath(),
-                             1002);
+                             uid1002);
 
             user_repo->save(user1);
             user_repo->save(user2);

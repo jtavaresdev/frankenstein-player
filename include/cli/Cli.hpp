@@ -17,6 +17,7 @@
 #include <iostream>
 
 #include <nlohmann/json.hpp>
+#include "core/bd/DatabaseManager.hpp"
 #include "core/services/ConfigManager.hpp"
 #include "core/entities/User.hpp"
 #include "core/services/Player.hpp"
@@ -40,6 +41,8 @@ namespace cli
     std::shared_ptr<core::Library> _library;
     std::shared_ptr<SQLite::Database> _db;
     nlohmann::json _helpData;
+    core::ConfigManager _config;
+    core::DatabaseManager _db_manager;
 
     /**
      * @brief toca um IPlayable ou um IPlayableObject

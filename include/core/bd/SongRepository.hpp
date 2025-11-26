@@ -20,10 +20,9 @@
 #include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/entities/Album.hpp"
 #include "core/entities/Artist.hpp"
+#include "core/entities/EntitiesFWD.hpp"
 #include "core/entities/Song.hpp"
-// #include "core/entities/User.hpp"
-// #include "core/entities/Playlist.hpp"
-#include "core/entities/EntitiesFWD.hpp"  // TODO incluir usuario e playlist
+#include "core/entities/User.hpp"
 
 namespace core {
 
@@ -39,7 +38,7 @@ namespace core {
          * @param entity Musica a ser inserida
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool insert(const Song& entity) override;
+        bool insert(Song &entity) override;
 
         /**
          * @brief Atualiza uma musica existente no repositório
@@ -47,7 +46,7 @@ namespace core {
          * @param entity Musica a ser atualizada
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool update(const Song& entity) override;
+        bool update(const Song &entity) override;
 
         /**
          * @brief Mapeia uma linha do resultado para uma musica
@@ -56,7 +55,7 @@ namespace core {
          * @return Ponteiro compartilhado para a musica mapeada
          */
         virtual std::shared_ptr<Song>
-        mapRowToEntity(SQLite::Statement& query) const override;
+        mapRowToEntity(SQLite::Statement &query) const override;
 
     public:
         SongRepository();
@@ -69,7 +68,7 @@ namespace core {
          * @param entity Musica a ser salva ou atualizada
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool save(Song& entity) override;
+        bool save(Song &entity) override;
 
         /**
          * @brief Remove uma musica do repositório pelo ID
@@ -87,14 +86,14 @@ namespace core {
          * fornecido
          */
         std::vector<std::shared_ptr<Song>>
-        findByTitleAndUser(const std::string& title, const User& user) const;
+        findByTitleAndUser(const std::string &title, const User &user) const;
 
         /**
          * @brief Busca musicas pelo usuário
          * @param user Usuário dono das musicas a serem buscadas
          * @return Vetor contendo as musicas que pertencem ao usuário fornecido
          */
-        std::vector<std::shared_ptr<Song>> findByUser(const User& user) const;
+        std::vector<std::shared_ptr<Song>> findByUser(const User &user) const;
 
         /**
          * @brief Busca musicas pelo artista
@@ -103,7 +102,7 @@ namespace core {
          * fornecido
          */
         std::vector<std::shared_ptr<Song>>
-        findByArtist(const Artist& artist) const;
+        findByArtist(const Artist &artist) const;
 
         /**
          * @brief Busca musicas pelo album
@@ -111,7 +110,7 @@ namespace core {
          * @return Vetor contendo as musicas que correspondem ao album fornecido
          */
         std::vector<std::shared_ptr<Song>>
-        findByAlbum(const Album& album) const;
+        findByAlbum(const Album &album) const;
 
         /**
          * @brief Busca uma musica pelo ID
@@ -126,14 +125,14 @@ namespace core {
          * @param song Musica cujo album será obtido
          * @return Ponteiro compartilhado para o album da musica
          */
-        std::shared_ptr<Album> getAlbum(const Song& song) const;
+        std::shared_ptr<Album> getAlbum(const Song &song) const;
 
         /**
          * @brief Obtém o artista de uma musica
          * @param song Musica cujo artista será obtido
          * @return Ponteiro compartilhado para o artista da musica
          */
-        std::shared_ptr<Artist> getArtist(const Song& song) const;
+        std::shared_ptr<Artist> getArtist(const Song &song) const;
 
         /**
          * @brief Obtém os artistas colaboradores de uma musica
@@ -141,13 +140,39 @@ namespace core {
          * @return Vetor contendo os artistas colaboradores da musica
          */
         std::vector<std::shared_ptr<Artist>>
-        getFeaturingArtists(const Song& song) const;
+        getFeaturingArtists(const Song &song) const;
 
         /**
          * @brief Conta o número total de musicas no repositório
          * @return Número total de musicas
          */
         virtual size_t count() const override;
+
+        /**
+         * @brief Adiciona artistas colaboradores de uma musica
+         * @param song Musica cujos artistas colaboradores serão obtidos
+         * @param artist Artista colaborador
+         * @param user Usuaria da sessao atual
+         * @return bool
+         */
+        bool addFeaturingArtist(const Song &song, const Artist &artist, const User &user) const;
+
+        /**
+         * @brief Remove artistas colaborador de uma musica
+         * @param song Musica cujos artistas colaboradores serão obtidos
+         * @param artist Artista colaborador
+         * @return bool
+         */
+        bool removeFeaturingArtist(const Song &song, const Artist &artist) const;
+
+        /**
+         * @brief Set artista princial de uma musica
+         * @param song Musica a ser alterada
+         * @param artist Artista autor da musica
+         * @param user Usuaria da sessao atual
+         * @return bool
+         */
+        bool setPrincipalArtist(const Song &song, const Artist &artist, const User &user) const;
     };
 
-}  // namespace core
+} // namespace core

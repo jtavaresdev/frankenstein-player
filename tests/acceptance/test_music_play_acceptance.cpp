@@ -12,7 +12,7 @@
 #include "core/services/PlaybackQueue.hpp"
 #include "core/services/Player.hpp"
 
-#include "fixtures/ConfigFixture.hpp"  // TODO corrigir include
+#include "fixtures/ConfigFixture.hpp" // TODO corrigir include
 #include "fixtures/MediaFixture.hpp"
 
 TEST_SUITE("HISTÓRIA DE USUÁRIO: Reprodução de Música") {
@@ -51,13 +51,13 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Reprodução de Música") {
                                                        *user);
 
             album->setSongsLoader([this]() {
-                return std::vector<std::shared_ptr<core::IPlayable>> {
+                return std::vector<std::shared_ptr<core::Song>>{
                     short_song,
                     medium_song};
             });
 
             artist->setSongsLoader([this]() {
-                return std::vector<std::shared_ptr<core::IPlayable>> {
+                return std::vector<std::shared_ptr<core::Song>>{
                     short_song,
                     medium_song};
             });
@@ -70,11 +70,14 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Reprodução de Música") {
             boost::filesystem::copy_file(
                 short_song_mock.path,
                 short_song->getAudioFilePath(),
-                boost::filesystem::copy_option::overwrite_if_exists);
+                //boost::filesystem::copy_option::overwrite_if_exists
+                boost::filesystem::copy_options::overwrite_existing
+            );
             boost::filesystem::copy_file(
                 medium_song_mock.path,
                 medium_song->getAudioFilePath(),
-                boost::filesystem::copy_option::overwrite_if_exists);
+                //boost::filesystem::copy_options::overwrite_existing);
+                boost::filesystem::copy_options::overwrite_existing);
         }
 
         ~PlayerFixture() {

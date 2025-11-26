@@ -19,7 +19,7 @@
 
 #include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/entities/Album.hpp"
-#include "core/entities/EntitiesFWD.hpp"  // TODO incluir usuario
+#include "core/entities/EntitiesFWD.hpp" // TODO incluir usuario
 #include "core/entities/Song.hpp"
 #include "core/entities/User.hpp"
 
@@ -37,7 +37,7 @@ namespace core {
          * @param entity Album a ser inserido
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool insert(const Album& entity) override;
+        bool insert(Album &entity) override;
 
         /**
          * @brief Atualiza um album existente no repositório
@@ -45,7 +45,7 @@ namespace core {
          * @param entity Album a ser atualizado
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool update(const Album& entity) override;
+        bool update(const Album &entity) override;
 
         /**
          * @brief Mapeia uma linha do resultado para um artista
@@ -54,7 +54,7 @@ namespace core {
          * @return Ponteiro compartilhado para o artista mapeado
          */
         virtual std::shared_ptr<Album>
-        mapRowToEntity(SQLite::Statement& query) const override;
+        mapRowToEntity(SQLite::Statement &query) const override;
 
     public:
         AlbumRepository(std::shared_ptr<SQLite::Database> db);
@@ -66,7 +66,7 @@ namespace core {
          * @param entity Album a ser salvo ou atualizado
          * @return true se a operação foi bem-sucedida, false caso contrário
          */
-        bool save(Album& entity) override;
+        bool save(Album &entity) override;
 
         /**
          * @brief Remove um album do repositório pelo ID
@@ -83,14 +83,14 @@ namespace core {
          * @return Vetor contendo os albuns que correspondem ao título fornecido
          */
         std::vector<std::shared_ptr<Album>>
-        findByTitleAndUser(const std::string& title, const User& user) const;
+        findByTitleAndUser(const std::string &title, const User &user) const;
 
         /**
          * @brief Busca albuns pelo usuário
          * @param user Usuário cujos albuns serão buscados
          * @return Vetor contendo os albuns que pertencem ao usuário fornecido
          */
-        std::vector<std::shared_ptr<Album>> findByUser(const User& user) const;
+        std::vector<std::shared_ptr<Album>> findByUser(const User &user) const;
 
         /**
          * @brief Busca albuns pelo artista e usuário
@@ -99,7 +99,7 @@ namespace core {
          * fornecido
          */
         std::vector<std::shared_ptr<Album>>
-        findByArtist(const std::string& artist) const;
+        findByArtist(const std::string &artist) const;
 
         /**
          * @brief Obtém um album pelo ID e usuário
@@ -115,7 +115,7 @@ namespace core {
          * @param album Álbum cujas músicas serão obtidas
          * @return Vetor contendo as músicas do álbum
          */
-        std::vector<std::shared_ptr<Song>> getSongs(const Album& album) const;
+        std::vector<std::shared_ptr<Song>> getSongs(const Album &album) const;
 
         /**
          * @brief Obtém os artistas colaboradores de um álbum
@@ -123,19 +123,37 @@ namespace core {
          * @return Vetor contendo os artistas colaboradores do álbum
          */
         std::vector<std::shared_ptr<Artist>>
-        getFeaturingArtists(const Album& album) const;
+        getFeaturingArtists(const Album &album) const;
 
         /**
          * @brief Obtém o artista principal de um álbum
          * @param album Álbum cujo artista principal será obtido
          * @return Ponteiro compartilhado para o artista principal do álbum
          */
-        std::shared_ptr<Artist> getArtist(const Album& album) const;
+        std::shared_ptr<Artist> getArtist(const Album &album) const;
 
         /**
          * @brief Conta o número total de albuns no repositório
          * @return Número total de albuns
          */
         virtual size_t count() const override;
+
+        /**
+         * @brief Adiciona artistas colaboradores de um álbum
+         * @param album Álbum cujos artistas colaboradores serão obtidos
+         * @param artist Artista colaborador do album
+         * @param user Usuario da sessão atual
+         * @return Vetor contendo os artistas colaboradores do álbum
+         */
+        bool addFeaturingArtist(const Album &album, const Artist &artist, const User &user) const;
+
+        /**
+         * @brief Adiciona artistas principal de um álbum
+         * @param album Álbum para ser editado
+         * @param artist Artista principal do album
+         * @param user Usuario da sessão atual
+         * @return Vetor contendo os artistas colaboradores do álbum
+         */
+        bool setPrincipalArtist(const Album &album, const Artist &artist, const User &user) const;
     };
-}  // namespace core
+} // namespace core
