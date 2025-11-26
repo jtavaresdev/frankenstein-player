@@ -311,14 +311,107 @@ namespace cli
         _player->getPlaybackQueue()->remove(idx);
     }
 
-    // TODO: implementar (depende de player)
-    /*
-        void Cli::showStatus() const
+    void Cli::showStatus() const
+    {
+        try
         {
-            _player->showStatus();
-        }
 
-    */
+            std::cout << "=== Player Status ===" << std::endl;
+
+            std::string state;
+            if (_player->isPlaying())
+                state = "Playing";
+            else if (_player->isPaused())
+                state = "Paused";
+            else
+                state = "Stopped";
+
+            std::cout << "Estado: " << state << std::endl;
+
+            float vol = _player->getVolume() * 100.0f;
+            std::cout << "Volume: " << static_cast<unsigned int>(vol) << "%";
+            if (_player->isMuted())
+                std::cout << " (muted)";
+            std::cout << std::endl;
+
+            std::cout << "Loop: " << (_player->isLooping() ? "on" : "off") << std::endl;
+
+            std::shared_ptr<core::PlaybackQueue> queue;
+
+            queue = _player->getPlaybackQueue();
+
+            if (queue)
+            {
+                std::cout << "Tamanho da fila: " << queue->size() << std::endl;
+
+                auto curr = queue->getCurrentSong();
+                if (curr)
+                {
+
+                    std::cout << "Musica atual: " << curr->getTitle();
+                    if (curr->getArtist())
+                        std::cout << " - " << curr->getArtist()->getName();
+                    std::cout << std::endl;
+
+                    unsigned int elapsed = 0;
+                    float progress = 0.0f;
+
+                    elapsed = _player->getElapsedTime();
+
+                    progress = _player->getProgress();
+
+                    if (progress > 0.0f && elapsed > 0)
+                    {
+                        unsigned int total = static_cast<unsigned int>(elapsed / progress);
+
+                        unsigned int m = elapsed / 60;
+                        unsigned int sec = elapsed % 60;
+                        char bufElapsed[32];
+                        std::snprintf(bufElapsed, sizeof(bufElapsed), "%02u:%02u", m, sec);
+
+                        m = total / 60;
+                        sec = total % 60;
+                        char bufTotal[32];
+                        std::snprintf(bufTotal, sizeof(bufTotal), "%02u:%02u", m, sec);
+
+                        std::cout << "Progresso: " << bufElapsed << " / " << bufTotal << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "Progresso: 0:0/0:0" << std::endl;
+                    }
+                }
+                else
+                {
+                    std::cout << "Nenhuma musica carregada atualmente." << std::endl;
+                }
+
+                auto next = queue->getNextSong();
+                if (next)
+                {
+
+                    std::cout << "Proxima musica: " << next->getTitle();
+                    if (next->getArtist())
+                        std::cout << " - " << next->getArtist()->getName();
+                    std::cout << std::endl;
+                }
+                else
+                {
+                    std::cout << "Proxima musica: (nenhuma)" << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "Fila: N/D" << std::endl;
+            }
+
+            std::cout << "======================" << std::endl;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Erro ao obter status do player: " << e.what() << std::endl;
+        }
+    }
 
     void Cli::showHelp() const
     {
