@@ -20,6 +20,7 @@
 #include "core/bd/DatabaseManager.hpp"
 #include "core/services/ConfigManager.hpp"
 #include "core/entities/User.hpp"
+#include "core/services/Manager.hpp"
 #include "core/services/Player.hpp"
 #include "core/entities/Playlist.hpp"
 #include "core/entities/Album.hpp"
@@ -27,6 +28,7 @@
 #include "core/bd/SongRepository.hpp"
 #include "core/bd/RepositoryFactory.hpp"
 #include "core/services/Library.hpp"
+#include "core/services/UsersManager.hpp"
 
 namespace cli
 {
@@ -43,6 +45,8 @@ namespace cli
     nlohmann::json _helpData;
     core::ConfigManager _config;
     core::DatabaseManager _db_manager;
+    std::shared_ptr<core::UsersManager> _usersManager;
+    std::shared_ptr<core::Manager> _manager;
 
     /**
      * @brief toca um IPlayable ou um IPlayableObject
@@ -262,6 +266,16 @@ namespace cli
      *
      */
     void searchPlaylist(const std::string &query) const;
+
+    /**
+     * @brief Atualiza a lista de usuários do sistema..
+     */
+    void updateUsers();
+
+    /**
+     * @brief Atualiza as músicas do usuário.
+     */
+    void updateSongs();
 
     /**
      * @brief Mostra a ajuda com os comandos disponíveis.

@@ -11,6 +11,7 @@
 #include "cli/Cli.hpp"
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include "core/bd/DatabaseManager.hpp"
 
 namespace cli
@@ -30,6 +31,13 @@ namespace cli
 
     Cli::Cli(core::ConfigManager &config_manager) : _config(config_manager)
     {
+        try {
+            config_manager.loadConfig();
+        } catch (const std::exception &e) {
+            std::cerr << "Erro ao carregar o arquivo de configuração:\n\t" << e.what() << std::endl;
+            throw;
+        }
+
         try
         {
             // _db = std::make_shared<SQLite::Database>(config_manager.databasePath(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
@@ -41,56 +49,33 @@ namespace cli
             throw;
         }
 
-        std::string username;
-        std::string home_path;
-        std::string input_path;
-        std::string uid;
-        try
-        {
-            username = config_manager.getConfigValue("user_username");
-            if (username.empty())
-            {
-                throw std::runtime_error("Username is empty in config");
-            }
-        }
-        catch (const std::exception &e)
-        {
-            username = std::string();
+        _usersManager = std::make_shared<core::UsersManager>(config_manager);
+        _usersManager->updateUsersList();
+
+        try {
+            _user = _usersManager->getCurrentUser();
+        } catch (const std::exception &e) {
+            std::cerr << "Erro ao obter o usuário atual:\n\t" << e.what() << std::endl;
+            throw;
         }
 
-        try
-        {
-            home_path = config_manager.userMusicDirectory();
-        }
-        catch (const std::exception &e)
-        {
-            home_path = std::string();
+        try {
+            _manager = std::make_shared<core::Manager>(config_manager);
+        } catch (const std::exception &e) {
+            std::cerr << "Erro ao criar o gerenciador principal:\n\t" << e.what() << std::endl;
+            throw;
         }
 
-        try
-        {
-            input_path = config_manager.inputUserPath();
-        }
-        catch (const std::exception &e)
-        {
-            if (!home_path.empty())
-                input_path = home_path + "/input/";
-            else
-                input_path = std::string();
-        }
-        try
-        {
-            uid = config_manager.getConfigValue("user_id");
-        }
-        catch (const std::exception &e)
-        {
-            uid = std::string();
-        }
-        _user = std::make_shared<core::User>(username, home_path, input_path, static_cast<core::userid>(std::stol(uid)));
+        // std::string username;
+        // std::string home_path;
+        // std::string input_path;
+        // std::string uid;
 
         _player = std::make_shared<core::Player>();
 
-        _library = std::make_shared<core::Library>(_user, _db);
+        _library = std::make_shared<core::Library>(_user, _db_manager.getDatabase());
+
+        _db = _db_manager.getDatabase();
 
         try
         {
@@ -241,7 +226,7 @@ namespace cli
          std::cout << "queue adicionar 6" << std::endl;
         try
         {
-            core::RepositoryFactory repo_factory(_db);
+            // core::RepositoryFactory repo_factory(_db);
 
             // auto tracks = core::PlaybackQueue(_user, playabel, repo_factory.createHistoryPlaybackRepository());
             // _player->addPlaybackQueue(tracks);
@@ -309,6 +294,7 @@ namespace cli
 
         _player->getPlaybackQueue()->add(playabel);
 
+        std::cout << "Tocando agora: " << std::endl;
         _player->play();
 
         _player->getPlaybackQueue()->add(*_savedQueue);
@@ -426,6 +412,24 @@ namespace cli
         }
     }
 
+    void Cli::updateUsers() {
+        try {
+            _usersManager->updateUsersList();
+            std::cout << "Lista de usuários atualizada com sucesso." << std::endl;
+        } catch (const std::exception &e) {
+            std::cerr << "Erro ao atualizar a lista de usuários: " << e.what() << std::endl;
+        }
+    }
+
+    void Cli::updateSongs() {
+        try {
+            _manager->update();
+            std::cout << "Biblioteca atualizada com sucesso." << std::endl;
+        } catch (const std::exception &e) {
+            std::cerr << "Erro ao atualizar a biblioteca: " << e.what() << std::endl;
+        }
+    }
+
     void Cli::showHelp() const
     {
         if (_helpData.empty() || !_helpData.contains("commands"))
@@ -470,6 +474,7 @@ namespace cli
     void Cli::searchSong(const std::string &query) const
     {
         auto songs = _library->searchSong(query);
+        std::cout << "Procurando por músicas com o termo: " << query << std::endl;
         if (songs.empty())
         {
             std::cout << "Nenhuma música encontrada para: " << query << std::endl;
@@ -946,6 +951,16 @@ namespace cli
             }
 
             showHelp("playlist");
+            return true;
+        }
+        else if (firstCommand == "update_users")
+        {
+            updateUsers();
+            return true;
+        }
+        else if (firstCommand == "update_songs" || firstCommand == "update_library")
+        {
+            updateSongs();
             return true;
         }
         else if (firstCommand == "search")
