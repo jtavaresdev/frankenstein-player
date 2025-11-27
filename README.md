@@ -95,10 +95,14 @@ sudo dnf install cmake
 sudo pacman -S cmake
 ```
 
-#### macOS (Homebrew)
+#### MacOS (Homebrew)
 ```bash
 brew install cmake
 ```
+
+#### Windows
+
+Acesse o link https://cmake.org/download/ para baixar e executar o instalador
 
 ### 2. Criar o diretório de compilação
 
@@ -107,22 +111,36 @@ mkdir build
 cd build
 ```
 
-### 3. Gerar arquivos de build com CMake
+### 3. Fazer o download das dependências 
+```bash
+git clone https://github.com/SRombauts/SQLiteCpp.git third_party/SQLiteCpp
+```
+
+### 4. Gerar arquivos de build com CMake
 
 ```bash
 cmake ..
 ```
 
-### 4. Compilar o projeto
+### 5. Compilar o projeto
 
 ```bash
-make
+make frankenstein_core
 ```
 
-### 5. Executar
+### 6. Executar
 
 ```bash
 ./frankenstein_player
+```
+
+#### Windows
+
+```bash
+cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM="3.5"
+cmake --build build
+cd build
+.\frankenstein_player.exe
 ```
 
 ## 👥 Autores
