@@ -53,7 +53,7 @@ namespace cli
      *
      * @param playabel caminho para a música.
      */
-    void play(core::IPlayable &playabel);
+    void play();
 
     /**
      * @brief recomeça a musica atual
@@ -317,6 +317,8 @@ namespace cli
      */
 
     void start();
+
+    void playFolder(const std::string& folderPath);
   };
 }
 

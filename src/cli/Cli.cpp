@@ -9,14 +9,16 @@
  */
 
 #include "cli/Cli.hpp"
+#include <boost/filesystem/path.hpp>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include "core/bd/DatabaseManager.hpp"
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 
 namespace cli
 {
-
     std::string trimSpaces(const std::string &str)
     {
         size_t firstNonSpace = str.find_first_not_of(" \t\n\r\f\v");
@@ -281,23 +283,11 @@ namespace cli
         return true;
     }
 
-    void Cli::play(core::IPlayable &playabel)
+    void Cli::play()
     {
-        std::shared_ptr<core::PlaybackQueue> _savedQueue;
-
-        if (_player->getPlaybackQueue() && !_player->getPlaybackQueue()->empty())
-        {
-            _savedQueue = std::make_shared<core::PlaybackQueue>(*_player->getPlaybackQueue());
-        }
-
-        _player->clearPlaylist();
-
-        _player->getPlaybackQueue()->add(playabel);
-
-        std::cout << "Tocando agora: " << std::endl;
-        _player->play();
-
-        _player->getPlaybackQueue()->add(*_savedQueue);
+        if (_player->getPlaybackQueue()){
+            _player->play();
+    }
     }
 
     void Cli::shuffle()
@@ -643,25 +633,8 @@ namespace cli
         {
             if (firstCommand == "play")
             {
-                std::string playable;
-                std::getline(ss, playable);
 
                 _player->play();
-
-                if (playable.empty())
-                {
-                    toggleResumePause();
-                    return true;
-                }
-
-                auto optPlayable = _library->searchSong(playable);
-                if (optPlayable.empty())
-                {
-                    std::cout << "Não encontrado: " << playable << std::endl;
-                    return false;
-                }
-                auto sp = optPlayable.at(0);
-                play(*sp);
                 return true;
             }
 
