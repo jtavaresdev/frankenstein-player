@@ -3,19 +3,26 @@
     "play": {
       "description": "Toca uma música, pausa ou retoma a reprodução.",
       "usage": "play [nome da música]",
-      "aliases": ["pause", "resume"],
+      "aliases": [
+        "pause",
+        "resume"
+      ],
       "details": "Se nenhum nome de música for fornecido, o comando alterna entre pausar e retomar a música atual. Se um nome de música for fornecido, ele a procurará e a tocará."
     },
     "status": {
       "description": "Mostra o status atual do player.",
       "usage": "status",
-      "aliases": ["info"],
+      "aliases": [
+        "info"
+      ],
       "details": "Exibe informações como a música atual, volume, progresso, etc."
     },
     "restart": {
       "description": "Reinicia a música atual.",
       "usage": "restart",
-      "aliases": ["replay"]
+      "aliases": [
+        "replay"
+      ]
     },
     "volume": {
       "description": "Ajusta ou exibe o volume.",
@@ -33,7 +40,10 @@
     "mute": {
       "description": "Silencia ou reativa o som do player.",
       "usage": "mute | unmute | toggle_mute",
-      "aliases": ["unmute", "toggle_mute"]
+      "aliases": [
+        "unmute",
+        "toggle_mute"
+      ]
     },
     "next": {
       "description": "Pula para a próxima música na fila.",
@@ -72,7 +82,9 @@
     "search": {
       "description": "Busca por músicas, artistas, álbuns ou playlists.",
       "usage": "search <song|artist|album|playlist> <termo de busca>",
-      "aliases": ["music"]
+      "aliases": [
+        "music"
+      ]
     },
     "help": {
       "description": "Mostra a lista de comandos ou a ajuda para um comando específico.",
@@ -81,7 +93,9 @@
     "exit": {
       "description": "Sai do Frankenstein Media Player.",
       "usage": "exit",
-      "aliases": ["quit"]
+      "aliases": [
+        "quit"
+      ]
     }
   }
 }

@@ -86,7 +86,7 @@ namespace cli
         {
             uid = std::string();
         }
-        _user = std::make_shared<core::User>(username, home_path, input_path, std::stoi(uid));
+        _user = std::make_shared<core::User>(username, home_path, input_path, static_cast<core::userid>(std::stol(uid)));
 
         _player = std::make_shared<core::Player>();
 
@@ -94,7 +94,7 @@ namespace cli
 
         try
         {
-            std::ifstream helpFile("resources/help.json");
+            std::ifstream helpFile("../resources/help.json");
             helpFile >> _helpData;
         }
         catch (const std::exception &e)
@@ -238,6 +238,7 @@ namespace cli
 
     void Cli::addToQueue(core::IPlayable &playabel)
     {
+         std::cout << "queue adicionar 6" << std::endl;
         try
         {
             core::RepositoryFactory repo_factory(_db);
@@ -787,16 +788,22 @@ namespace cli
                     std::string playable;
                     std::getline(ss, playable);
                     playable = trimSpaces(playable);
+                     std::cout << "queue adicionar 1" << std::endl;
                     if (!playable.empty())
                     {
+                        std::cout << "queue adicionar 2" << std::endl;
                         auto opt = _library->searchSong(playable);
+                        std::cout << "queue adicionar 3" << std::endl;
                         if (opt.empty())
                         {
                             std::cout << "Música não encontrada: " << playable << std::endl;
                             return false;
                         }
+
                         auto sp = opt.at(0);
+                        std::cout << "queue adicionar 4" << std::endl;
                         addToQueue(*sp);
+                        std::cout << "queue adicionar 5" << std::endl;
                         return true;
                     }
 
