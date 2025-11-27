@@ -125,7 +125,7 @@ cmake ..
 ### 5. Compilar o projeto
 
 ```bash
-make frankenstein_core
+make frankenstein_player
 ```
 
 ### 6. Executar
