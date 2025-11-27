@@ -72,7 +72,7 @@ namespace core {
 
         /**
          * @brief Retira os espaços do inicio e do fim
-         * 
+         *
          */
         std::string cleanString(const std::string& str);
 
@@ -91,6 +91,8 @@ namespace core {
                 std::shared_ptr<AlbumRepository> albumRepo);
 
         Manager(ConfigManager &config);
+
+        Manager(ConfigManager &config, SQLite::Database& db);
 
         /***
          * @brief Atualiza toda a organização das músicas com base no diretório temporário

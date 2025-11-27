@@ -66,7 +66,7 @@ namespace core {
     };
 
     std::shared_ptr<const Artist> Song::getArtist() const {
-        return _artist;
+        return artistLoader ? artistLoader() : _artist;
     };
 
     std::vector<unsigned> Song::getFeaturingArtistsId() const {
@@ -90,7 +90,7 @@ namespace core {
     };
 
     std::shared_ptr<const Album> Song::getAlbum() const {
-        return _album;
+        return albumLoader ? albumLoader() : _album;
     };
 
     int Song::getDuration() const {

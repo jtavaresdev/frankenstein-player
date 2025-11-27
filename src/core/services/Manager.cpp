@@ -31,17 +31,25 @@ namespace core
             _albumRepo = repo_factory.createAlbumRepository();
         }
 
+    Manager::Manager(ConfigManager &config, SQLite::Database &db)
+        : _config(config), _usersManager(config, db) {
+            RepositoryFactory repo_factory(std::shared_ptr<SQLite::Database>(&db, [](SQLite::Database*){}));
+            _songRepo = repo_factory.createSongRepository();
+            _artistRepo = repo_factory.createArtistRepository();
+            _albumRepo = repo_factory.createAlbumRepository();
+        }
+
     std::string Manager::cleanString(const std::string& str)
     {
         auto begin = std::find_if_not(str.begin(), str.end(),
                                         [](unsigned char ch){ return std::isspace(ch); });
-    
+
         auto end = std::find_if_not(str.rbegin(), str.rend(),
                                     [](unsigned char ch){ return std::isspace(ch); }).base();
-    
+
         if (begin >= end)
             return "";
-    
+
         return std::string(begin, end);
     }
 
@@ -51,7 +59,7 @@ namespace core
         fs::path destination(newFilePath);
         try {
             fs::create_directories(destination.parent_path());
-        
+
             fs::rename(source, destination);
         }
         catch (const std::exception &e)
@@ -102,7 +110,7 @@ namespace core
         while(std::getline(ss, artistName, '/')) {
             artistName = cleanString(artistName);
             std::vector<std::shared_ptr<Artist>> artists = _artistRepo->findByName(artistName);
-            
+
             if (artists.empty())
             {
                 artist = std::make_shared<Artist>(artistName, song->getGenre());
@@ -120,9 +128,9 @@ namespace core
             } else {
                 featuring.push_back(artist);
             }
-            
+
         }
-        
+
 
         std::string albumTitle = tag->album().isEmpty() ? "Singles" : tag->album().toCString();
         std::vector<std::shared_ptr<Album>> albums = _albumRepo->findByArtist(artistName);
@@ -195,6 +203,8 @@ namespace core
             std::string inputDir = par.second;
             User user = par.first;
 
+            // std::cout << "Processando diretório de input: " << inputDir << " para o usuário: " << user.getUsername() << std::endl;
+
             if (!fs::exists(inputDir))
             {
                 continue;
@@ -225,9 +235,9 @@ namespace core
                         _songRepo->save(*song);
 
                         if (!song) {
-                                std::cerr << "Metadados insuficientes para arquivo '" << filePath << "', pulando." << std::endl;
-                                continue;
-                            }
+                            std::cerr << "Metadados insuficientes para arquivo '" << filePath << "', pulando." << std::endl;
+                            continue;
+                        }
                         move(filePath, song->getAudioFilePath());
                     }
                     catch (const std::exception &e)

@@ -32,7 +32,11 @@ namespace core {
                 query.bind(4, std::to_string(entity.getUID()));
         #endif
 
-        return query.exec() > 0;
+        bool success = query.exec() > 0;
+        if (success)
+            entity.setId(static_cast<unsigned>(getLastInsertId()));
+
+        return success;
     }
 
     bool UserRepository::update(const User& entity) {

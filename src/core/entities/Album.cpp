@@ -92,7 +92,7 @@ namespace core {
     };
 
     int Album::getSongCount() const {
-        return static_cast<int>(_songs.size());
+        return static_cast<int>(getSongs().size());
     };
 
     // Setters
@@ -201,6 +201,11 @@ namespace core {
     };
 
     std::vector<std::shared_ptr<Song>> Album::getSongs() const {
+        if (songsLoader) {
+            _songs = songsLoader();
+            return songsLoader();
+        }
+
         std::vector<std::shared_ptr<Song>> vector;
         for (auto const &s : _songs) {
             vector.push_back(s);

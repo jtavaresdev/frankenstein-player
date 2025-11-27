@@ -19,6 +19,8 @@
     track_number INTEGER,
     album_id INTEGER,
     artist_id INTEGER NOT NULL,
+    release_year INTEGER,
+    genre TEXT,
     file_size INTEGER,
     bitrate INTEGER,
     sample_rate INTEGER,
@@ -38,7 +40,8 @@ namespace core {
     }
 
     bool SongRepository::insert(Song &entity) {
-        std::string sql = "INSERT INTO " + _table_name + " (title, duration, track_number, artist_id, album_id, user_id) " + "VALUES(?, ?, ?, ?, ?, ?);";
+        std::string sql = "INSERT INTO " + _table_name + " (title, duration, track_number, artist_id, album_id, user_id, release_year) "
+                                                    "VALUES (?, ?, ?, ?, ?, ?, ?);";
 
 
 
@@ -47,6 +50,7 @@ namespace core {
         query.bind(2, entity.getDuration());
         query.bind(3, entity.getTrackNumber());
         query.bind(4, entity.getArtist()->getId());
+        query.bind(7, entity.getYear());
         std::shared_ptr<const Album> album = entity.getAlbum();
         if (album != nullptr)
             query.bind(5, album->getId());
@@ -77,18 +81,34 @@ namespace core {
     std::shared_ptr<Song> SongRepository::mapRowToEntity(SQLite::Statement &query) const {
         unsigned id = query.getColumn("id").getInt();
         std::string title = query.getColumn("title").getString();
+        unsigned duration = query.getColumn("duration").getInt();
+        unsigned track_number = query.getColumn("track_number").getInt();
         unsigned artist_id = query.getColumn("artist_id").getInt();
         unsigned user_id = query.getColumn("user_id").getInt();
+        int year = query.getColumn("release_year").getInt();
 
         auto song = std::make_shared<Song>(id, title, artist_id, user_id);
+        song->setDuration(duration);
+        song->setTrackNumber(track_number);
+        song->setYear(year);
 
-        auto artistsLoader = [this, id]() -> std::vector<std::shared_ptr<Artist>> {
+        auto artistLoader = [this, song]() -> std::shared_ptr<Artist> {
+            return this->getArtist(*song);
+        };
+
+        auto featuringArtistsLoader = [this, id]() -> std::vector<std::shared_ptr<Artist>> {
             Song tempSong;
             tempSong.setId(id);
             return this->getFeaturingArtists(tempSong);
         };
 
-        song->setFeaturingArtistsLoader(artistsLoader);
+        auto albumLoader = [this, song]() -> std::shared_ptr<Album> {
+            return this->getAlbum(*song);
+        };
+
+        song->setArtistLoader(artistLoader);
+        song->setFeaturingArtistsLoader(featuringArtistsLoader);
+        song->setAlbumLoader(albumLoader);
 
         return song;
     }
@@ -113,7 +133,7 @@ namespace core {
     std::vector<std::shared_ptr<Song>>
     SongRepository::findByTitleAndUser(const std::string &title,
                                        const User &user) const {
-        std::string sql = "SELECT * FROM " + _table_name + " WHERE title LIKE ? AND user_id = ?;";
+        std::string sql = "SELECT * FROM " + _table_name + " WHERE title LIKE ? AND user_id = ? ORDER BY title;";
 
         SQLite::Statement query = prepare(sql);
         query.bind(1, "%" + title + "%"); // "%" nao considera char especial

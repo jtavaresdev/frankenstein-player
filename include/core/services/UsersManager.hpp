@@ -26,7 +26,7 @@ namespace core {
     class UsersManager {
     private:
         std::vector<User> _users; /*!< Vetor que armazena os usuários do sistema */
-        std::unique_ptr<UserRepository> _userRepository; /*!< Repositório para operações de banco de dados relacionadas a usuários */
+        std::shared_ptr<UserRepository> _userRepository; /*!< Repositório para operações de banco de dados relacionadas a usuários */
         std::shared_ptr<ConfigManager> _configManager;   /*!< Gerenciador de configuração do sistema */
 
         #if defined(_WIN32)
@@ -69,6 +69,8 @@ namespace core {
          *
          */
         UsersManager(ConfigManager &configManager);
+
+        UsersManager(ConfigManager &configManager, SQLite::Database &db);
 
         /**
          * @brief Destrutor da classe UsersManager

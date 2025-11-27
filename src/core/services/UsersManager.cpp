@@ -15,6 +15,7 @@
 #include "core/bd/UserRepository.hpp"
 #include "core/entities/User.hpp"
 
+#include <iostream>
 #include <string>
 #if defined(_WIN32)
     #include <windows.h>
@@ -180,6 +181,32 @@ namespace core {
             _users.push_back(*user);
     }
 
+    UsersManager::UsersManager(ConfigManager &configManager, SQLite::Database &db)
+        : _configManager(std::make_shared<ConfigManager>(configManager)) {
+
+        RepositoryFactory repo_factory(std::shared_ptr<SQLite::Database>(&db, [](SQLite::Database*){}));
+        _userRepository = repo_factory.createUserRepository();
+
+        if (!checkIfPublicUserExists()) {
+            User public_user("public");
+            public_user.setHomePath(_configManager->publicMusicDirectory());
+            public_user.setInputPath(_configManager->inputPublicPath());
+            public_user.setUID(0);
+
+            if (!_userRepository->save(public_user)) {
+
+                throw std::runtime_error(
+                    "Erro ao criar o usuário público no banco de dados.");
+            }
+
+        }
+
+        _users.clear();
+        auto stored_users = _userRepository->getAll();
+        for (const auto& user : stored_users)
+            _users.push_back(*user);
+    }
+
     UsersManager::~UsersManager() {}
 
     bool UsersManager::checkIfPublicUserExists() {
@@ -268,7 +295,9 @@ namespace core {
         #else
             userid current_uid = getuid();
         #endif
+
         auto user = _userRepository->findByUID(current_uid);
+        // std::cout << (user == nullptr) << std::endl;
         user->setIsCurrentUser(true);
         return user;
     }

@@ -71,6 +71,11 @@ namespace core {
             return this->getFeaturingArtists(tempAlbum);
         };
 
+        auto songs_loader = [this, album]() -> std::vector<std::shared_ptr<Song>> {
+            return this->getSongs(*album);
+        };
+
+        album->setSongsLoader(songs_loader);
         album->setFeaturingArtistsLoader(artists_loader);
         return album;
     };
