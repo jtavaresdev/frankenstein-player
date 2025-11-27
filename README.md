@@ -26,6 +26,11 @@ A documentação completa do projeto está disponível em:
 - Mantém ordem original das faixas
 - Calcula durações totais e fornece navegação sequencial
 
+#### 📀 Playlist (Playlist)
+- Agrupa músicas de forma organizada e personalizada
+- Suporte para adicionar, remover e reordenar faixas
+- Mantém metadados como duração total
+
 #### ▶️ Player (Reprodutor)
 - Controle de reprodução de áudio
 - Playlist management
@@ -54,7 +59,7 @@ A documentação completa do projeto está disponível em:
 - ✅ Duração total de artistas e álbuns
 - ✅ Formatação de tempos (HH:MM:SS)
 
-## 🚀 Como Usar
+## ⚙️ Especificações
 
 ### Pré-requisitos
 - Compilador C++11 ou superior
@@ -68,6 +73,56 @@ doxygen Doxyfile
 
 # A documentação estará em:
 # docs/latex/refman.pdf
+```
+
+## 🚀 Como Usar
+
+### 1. Instalar o CMake
+
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt update
+sudo apt install cmake
+```
+
+#### Fedora
+```bash
+sudo dnf install cmake
+```
+
+#### Arch Linux
+```bash
+sudo pacman -S cmake
+```
+
+#### macOS (Homebrew)
+```bash
+brew install cmake
+```
+
+### 2. Criar o diretório de compilação
+
+```bash
+mkdir build
+cd build
+```
+
+### 3. Gerar arquivos de build com CMake
+
+```bash
+cmake ..
+```
+
+### 4. Compilar o projeto
+
+```bash
+make
+```
+
+### 5. Executar
+
+```bash
+./frankenstein_player
 ```
 
 ## 👥 Autores
