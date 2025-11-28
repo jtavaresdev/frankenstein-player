@@ -63,6 +63,8 @@ cd ..
 # Criar a estrutura de diretórios do user_data
 mkdir user_data
 mkdir user_data/input
+mkdir user_data/input/public
+mkdir user_data/input/user
 mkdir user_data/user
 
 echo "Todos os comandos foram executados com sucesso!"
