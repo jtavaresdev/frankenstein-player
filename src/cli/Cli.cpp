@@ -9,13 +9,10 @@
  */
 
 #include "cli/Cli.hpp"
-#include <boost/filesystem/path.hpp>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include "core/bd/DatabaseManager.hpp"
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
 
 namespace cli {
     std::string trimSpaces(const std::string& str) {
@@ -458,19 +455,23 @@ namespace cli {
         }
     }
 
-    void Cli::searchAlbum(const std::string& query) const {
+    void Cli::searchAlbum(const std::string &query) const
+    {
         auto albums = _library->searchAlbum(query);
-        if (albums.empty()) {
+        if (albums.empty())
+        {
             std::cout << "Nenhum album encontrado para: " << query << std::endl;
             return;
-        } else if (albums.size() == 1) {
-            std::cout << "1 album encontrado: " << albums.at(0)->getName()
-                      << std::endl;
-        } else {
+        }
+        else if (albums.size() == 1)
+        {
+            std::cout << "1 album encontrado: " << albums.at(0)->getTitle() << std::endl;
+        }
+        else
+        {
             std::cout << albums.size() << "Albuns encontrados: \n";
             for (auto album : albums)
-                std::cout << album->getName() << " por "
-                          << album->getArtist()->getName() << std::endl;
+                std::cout << album->getTitle() << " por " << album->getArtist()->getName() << std::endl;
         }
     }
 
