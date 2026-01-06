@@ -48,7 +48,7 @@ namespace core {
         std::shared_ptr<User> _user;
         unsigned _artist_id;
         mutable std::weak_ptr<Artist> _artist;
-        std::vector<unsigned> _featuring_artists_ids;
+        mutable std::vector<unsigned> _featuring_artists_ids;
         unsigned _album_id;
         mutable std::weak_ptr<Album> _album;
         int _duration;
@@ -102,9 +102,9 @@ namespace core {
          * @param album Referência para o ID do álbum
          */
         Song(unsigned id,
-             const std::string& title,
-             unsigned& artist_id,
-             unsigned& album_id);
+             const std::string &title,
+             unsigned artist_id,
+             unsigned album_id);
 
         /**
          * @brief Construtor completo com objetos relacionados
@@ -152,11 +152,17 @@ namespace core {
          */
         std::shared_ptr<const Artist> getArtist() const;
 
-        // /*
-        //  * @brief Obtem ID dos artista musica
-        //  * @return Vetor com id dos artistas
-        //  */
-        // std::vector<unsigned> getFeaturingArtistsId() const;
+        /**
+         * @brief Obtem ID do artista musica
+         * @return id do artista
+         */
+        unsigned getArtistId() const;
+
+        /*
+         * @brief Obtem ID dos artista musica
+         * @return Vetor com id dos artistas
+         */
+        std::vector<unsigned> getFeaturingArtistsId() const;
 
         /**
          * @brief Obtém os artistas colaboradores (featuring)
@@ -178,6 +184,11 @@ namespace core {
          * @return Nome do álbum
          */
         std::shared_ptr<const Album> getAlbum() const;
+        /**
+         * @brief Obtem ID do album musica
+         * @return id do album
+         */
+        unsigned getAlbumId() const;
         /**
          * @brief Obtém a duração
          * @return Duração em segundos
