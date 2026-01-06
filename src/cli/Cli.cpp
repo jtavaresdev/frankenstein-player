@@ -325,9 +325,8 @@ namespace cli {
                                         + std::to_string(s);
                         }
 
-                        auto totalDuration = _player->getCurrentQueue()
-                                                 ->getCurrentSong()
-                                                 ->getFormattedDuration();
+                        
+                        auto totalDuration = _player->getPlaybackQueue()->getCurrentSong()->getDuration();
 
                         std::cout << "Progresso: " << formatted << " / "
                                   << totalDuration << std::endl;

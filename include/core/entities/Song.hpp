@@ -118,10 +118,6 @@ namespace core {
              const Album& album,
              const User& user);
 
-        Song(unsigned id,
-            const std::string& file_path,
-            const std::string& title);
-
         /**
          * @brief Construtor de cópia da classe Song
          * @param other Outro objeto Song para copiar
