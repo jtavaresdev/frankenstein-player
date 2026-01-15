@@ -83,19 +83,16 @@ namespace core {
          * @param artist Ponteiro compartilhado para o artista principal
          * @param album Ponteiro compartilhado para o álbum
          */
-        Song(const std::string &title,
-             Artist &artist,
-             Album &album);
+        Song(const std::string& title, Artist& artist, Album& album);
 
         /**
-         * @brief Construtor básico para criação de música com informações essenciais
+         * @brief Construtor básico para criação de música com informações
+         * essenciais
          * @param id Identificador único da música
          * @param title Título da música
          * @param artist_id Identificador do artista principal
          */
-        Song(unsigned id,
-             std::string title,
-             unsigned artist_id);
+        Song(unsigned id, std::string title, unsigned artist_id);
 
         /**
          * @brief Construtor para música com ID, título, artista e usuário
@@ -116,20 +113,23 @@ namespace core {
          * @param album Referência para o objeto Album
          * @param user Referência para o objeto User proprietário
          */
-        Song(const std::string &title, const Artist &artist, const Album &album, const User &user);
+        Song(const std::string& title,
+             const Artist& artist,
+             const Album& album,
+             const User& user);
 
         /**
          * @brief Construtor de cópia da classe Song
          * @param other Outro objeto Song para copiar
          */
-        Song(const Song &other) = default;
+        Song(const Song& other) = default;
 
         /**
          * @brief Operador de atribuição da classe Song
          * @param other Outro objeto Song para atribuir
          * @return Referência ao objeto Song atribuído
          */
-        Song &operator=(const Song &other) = default;
+        Song& operator=(const Song& other) = default;
 
         /**
          * @brief Destrutor da classe Song
@@ -172,7 +172,7 @@ namespace core {
          * @param artist Artista  a ser adicionado
          */
         void
-        setFeaturingArtists(std::shared_ptr<Artist> &
+        setFeaturingArtists(std::shared_ptr<Artist>&
                                 artist); // TODO overloard p passar o vector
 
         /**
@@ -190,6 +190,13 @@ namespace core {
          * @return Duração em segundos
          */
         int getDuration() const;
+
+        /*
+         * @brief Obtém a duraçã0 formatada
+         * @return Durantaçaõ formato "HH:MM:SS" ou "MM:SS"
+         */
+        std::string getFormattedDuration() const;
+
         /**
          * @brief Obtém o número da faixa no album
          * @return Número da faixa
@@ -215,17 +222,17 @@ namespace core {
          * @brief Define o usuário dono da música
          * @param user Novo usuário
          */
-        void setUser(const User &user);
+        void setUser(const User& user);
         /**
          * @brief Define o título da música
          * @param title Novo título
          */
-        void setTitle(const std::string &title);
+        void setTitle(const std::string& title);
         /**
          * @brief Define o artista principal
          * @param artist Novo artista
          */
-        void setArtist(std::shared_ptr<Artist> &artist);
+        void setArtist(std::shared_ptr<Artist>& artist);
         /**
          * @brief Define o número da faixa no álbum
          * @param track_number Novo número da faixa
@@ -237,37 +244,37 @@ namespace core {
          * artista
          */
         void
-        setArtistLoader(const std::function<std::shared_ptr<Artist>()> &loader);
+        setArtistLoader(const std::function<std::shared_ptr<Artist>()>& loader);
         /**
          * @brief Define a função para carregar os artistas colaboradores
          * @param loader Função que retorna um vetor de ponteiros compartilhados
          * para os artistas colaboradores
          */
         void setFeaturingArtistsLoader(
-            const std::function<std::vector<std::shared_ptr<Artist>>()> &
+            const std::function<std::vector<std::shared_ptr<Artist>>()>&
                 loader);
         /**
          * @brief Define os artistas colaboradores (featuring)
          * @param artists Vetor de artistas colaboradores
          */
-        void setFeaturingArtists(const std::vector<Artist> &artists);
+        void setFeaturingArtists(const std::vector<Artist>& artists);
         /**
          * @brief Define função para carregar o álbum
          * @param loader Função que retorna um ponteiro compartilhado para o
          * álbum
          */
         void
-        setAlbumLoader(const std::function<std::shared_ptr<Album>()> &loader);
+        setAlbumLoader(const std::function<std::shared_ptr<Album>()>& loader);
         /**
          * @brief Define o álbum
          * @param album Novo álbum
          */
-        void setAlbum(const Album &album);
+        void setAlbum(const Album& album);
         /**
          * @brief Define o gênero
          * @param genre Novo gênero
          */
-        void setGenre(const std::string &genre);
+        void setGenre(const std::string& genre);
         /**
          * @brief Define o ano de lançamento
          * @param year Novo ano
@@ -309,14 +316,14 @@ namespace core {
          * @param other Song a ser comparada
          * @return true se as entidades forem iguais, false caso contrário
          */
-        bool operator==(const Entity &other) const override;
+        bool operator==(const Entity& other) const override;
 
         /**
          * @brief Compara duas Song para desigualdade
          * @param other Song a ser comparada
          * @return true se as entidades forem diferentes, false caso contrário
          */
-        bool operator!=(const Entity &other) const override;
+        bool operator!=(const Entity& other) const override;
 
         /**
          * @brief Compara qual Song é menor
@@ -324,15 +331,15 @@ namespace core {
          * @return true se a entidade atual for menor que a outra, false caso
          * contrário
          */
-        bool operator<(const Entity &other) const override;
+        bool operator<(const Entity& other) const override;
 
         /**
          * @brief Compara qual Song é maior ou igual
          * @param other Song a ser comparada
-         * @return true se a entidade atual for maior ou igual que a outra, false
-         * caso contrário
+         * @return true se a entidade atual for maior ou igual que a outra,
+         * false caso contrário
          */
-        bool operator<=(const Entity &other) const override;
+        bool operator<=(const Entity& other) const override;
 
         /**
          * @brief Compara qual Song é maior
@@ -340,16 +347,15 @@ namespace core {
          * @return true se a entidade atual for maior que a outra, false caso
          * contrário
          */
-        bool operator>(const Entity &other) const override;
+        bool operator>(const Entity& other) const override;
 
         /**
          * @brief Compara qual Song é maior ou igual
          * @param other Song a ser comparada
-         * @return true se a entidade atual for maior ou igual que a outra, false
-         * caso contrário
+         * @return true se a entidade atual for maior ou igual que a outra,
+         * false caso contrário
          */
-        bool operator>=(const Entity &other) const override;
-
+        bool operator>=(const Entity& other) const override;
 
         /**
          * @brief Obtém o caminho do arquivo de áudio
