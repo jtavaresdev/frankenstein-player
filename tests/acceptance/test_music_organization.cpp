@@ -165,7 +165,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             if (!fs::exists(input_dir))
                 fs::create_directories(input_dir);
 
-            fs::copy(song_mock1.path, user.getInputPath() + "tmp1.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock1.path, user.getInputPath() + "/tmp1.mp3", fs::copy_options::overwrite_existing);
             CHECK(fs::exists(user.getInputPath() + "/tmp1.mp3"));
             manager->update();
 
