@@ -63,7 +63,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             CHECK_EQ(songs[0]->getArtist()->getName(), song.artist);
             // CHECK_EQ(songs[0]->getArtist()->getName(), song.artist);
         if (!song.album.empty())
-            CHECK_EQ(songs[0]->getAlbum()->getName(), song.album);
+            CHECK_EQ(songs[0]->getAlbum()->getTitle(), song.album);
         CHECK_EQ(songs[0]->getYear(), std::stoi(song.year));
         // CHECK_EQ(songs[0]->getGenre(), song.genre);
     }
@@ -117,6 +117,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
 
             auto song_mock1 =
                 media.getSongTestMock("Short_Song_Test_The_Testers");
+
             auto song_mock2 =
                 media.getSongTestMock("Medium_Song_Test_The_Testers");
 
@@ -124,8 +125,8 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             if (!fs::exists(input_dir))
                 fs::create_directories(input_dir);
 
-            fs::copy(song_mock1.path, user.getInputPath() + "/tmp1.mp3", fs::copy_options::overwrite_existing);
-            fs::copy(song_mock2.path, user.getInputPath() + "/tmp2.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock1.path, user.getInputPath() + "tmp1.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock2.path, user.getInputPath() + "tmp2.mp3", fs::copy_options::overwrite_existing);
             CHECK(fs::exists(user.getInputPath() + "/tmp1.mp3"));
             CHECK(fs::exists(user.getInputPath() + "/tmp2.mp3"));
             manager->update();
@@ -164,7 +165,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             if (!fs::exists(input_dir))
                 fs::create_directories(input_dir);
 
-            fs::copy(song_mock1.path, user.getInputPath() + "/tmp1.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock1.path, user.getInputPath() + "tmp1.mp3", fs::copy_options::overwrite_existing);
             CHECK(fs::exists(user.getInputPath() + "/tmp1.mp3"));
             manager->update();
 
@@ -175,7 +176,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             CHECK(fs::exists(song1_path_registre));
             checkSongInDatabase(song_mock1, user);
 
-            fs::copy(song_mock2.path, user.getInputPath() + "/tmp2.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock2.path, user.getInputPath() + "tmp2.mp3", fs::copy_options::overwrite_existing);
             manager->update();
 
             std::string song2_path_registre =
@@ -190,7 +191,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
 
             auto albuns = album_repo->getAll();
             CHECK_EQ(albuns.size(), 1);
-            CHECK_EQ(albuns[0]->getSongCount(), 2);
+            CHECK_EQ(albuns[0]->getSongsCount(), 2);
 
             clearTestEnvironment();
         }
@@ -222,8 +223,8 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             if (!fs::exists(input_dir2))
                 fs::create_directories(input_dir2);
 
-            fs::copy(song_mock1.path, user1.getInputPath() + "/tmp1.mp3", fs::copy_options::overwrite_existing);
-            fs::copy(song_mock2.path, user2.getInputPath() + "/tmp2.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock1.path, user1.getInputPath() + "tmp1.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock2.path, user2.getInputPath() + "tmp2.mp3", fs::copy_options::overwrite_existing);
             manager->update();
 
             std::string song1_path_registre =
@@ -257,7 +258,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             fs::path input_dir(config.inputPublicPath());
             if (!fs::exists(input_dir))
                 fs::create_directories(input_dir);
-            fs::copy(song_mock1.path, config.inputPublicPath() + "/tmp1.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock1.path, config.inputPublicPath() + "tmp1.mp3", fs::copy_options::overwrite_existing);
             manager->update();
 
             std::string song1_path_registre =
@@ -276,7 +277,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
                 FAIL_CHECK(
                     "Erro: song_mock1.artist está vazio, não foi possível verificar o artista.");
             if (!song_mock1.album.empty())
-                CHECK_EQ(songs[0]->getAlbum()->getName(), song_mock1.album);
+                CHECK_EQ(songs[0]->getAlbum()->getTitle(), song_mock1.album);
             else
                 FAIL_CHECK(
                     "Erro: song_mock1.album está vazio, não foi possível verificar o álbum.");
@@ -319,7 +320,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             if (!fs::exists(input_dir))
                 fs::create_directories(input_dir);
 
-            fs::copy(song_mock.path, user.getInputPath() + "/tmp.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock.path, user.getInputPath() + "tmp.mp3", fs::copy_options::overwrite_existing);
             CHECK(fs::exists(user.getInputPath() + "/tmp.mp3"));
 
             manager->update();
@@ -351,8 +352,8 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             if (!fs::exists(input_dir))
                 fs::create_directories(input_dir);
 
-            fs::copy(song_mock1.path, user.getInputPath() + "/tmp1.mp3", fs::copy_options::overwrite_existing);
-            fs::copy(song_mock2.path, user.getInputPath() + "/tmp2.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock1.path, user.getInputPath() + "tmp1.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock2.path, user.getInputPath() + "tmp2.mp3", fs::copy_options::overwrite_existing);
             CHECK(fs::exists(user.getInputPath() + "/tmp1.mp3"));
             CHECK(fs::exists(user.getInputPath() + "/tmp2.mp3"));
 
@@ -388,7 +389,7 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             if (!fs::exists(input_dir))
                 fs::create_directories(input_dir);
 
-            fs::copy(song_mock.path, user.getInputPath() + "/tmp.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock.path, user.getInputPath() + "tmp.mp3", fs::copy_options::overwrite_existing);
             CHECK(fs::exists(user.getInputPath() + "/tmp.mp3"));
 
             manager->update();
@@ -455,8 +456,8 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             if (!fs::exists(input_dir))
                 fs::create_directories(input_dir);
 
-            fs::copy(song_mock1.path, user.getInputPath() + "/tmp1.mp3", fs::copy_options::overwrite_existing);
-            fs::copy(song_mock2.path, user.getInputPath() + "/tmp2.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock1.path, user.getInputPath() + "tmp1.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock2.path, user.getInputPath() + "tmp2.mp3", fs::copy_options::overwrite_existing);
             CHECK(fs::exists(user.getInputPath() + "/tmp1.mp3"));
             CHECK(fs::exists(user.getInputPath() + "/tmp2.mp3"));
 
@@ -519,8 +520,8 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Organização de Músicas") {
             if (!fs::exists(input_dir2))
                 fs::create_directories(input_dir2);
 
-            fs::copy(song_mock1.path, user1.getInputPath() + "/tmp1.mp3", fs::copy_options::overwrite_existing);
-            fs::copy(song_mock2.path, user2.getInputPath() + "/tmp2.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock1.path, user1.getInputPath() + "tmp1.mp3", fs::copy_options::overwrite_existing);
+            fs::copy(song_mock2.path, user2.getInputPath() + "tmp2.mp3", fs::copy_options::overwrite_existing);
             CHECK(fs::exists(user1.getInputPath() + "/tmp1.mp3"));
             CHECK(fs::exists(user2.getInputPath() + "/tmp2.mp3"));
 

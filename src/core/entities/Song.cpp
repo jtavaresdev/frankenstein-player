@@ -32,7 +32,7 @@ namespace core {
           _duration(0) {};
 
     Song::Song(unsigned id,
-               const std::string &title,
+               const std::string& title,
                unsigned artist_id,
                unsigned album_id)
         : Entity(id),
@@ -80,7 +80,7 @@ namespace core {
     std::vector<unsigned> Song::getFeaturingArtistsId() const {
         auto _featuring_artists = featuringArtistsLoader();
         _featuring_artists_ids.clear();
-        for (auto const &a : _featuring_artists)
+        for (auto const& a : _featuring_artists)
             _featuring_artists_ids.push_back(a->getId());
 
         return std::vector<unsigned>(_featuring_artists_ids);
@@ -237,6 +237,10 @@ namespace core {
     void Song::setDuration(int sec) {
         _duration = sec;
     };
+
+    void Song::setAlbumId(unsigned id) {
+      _album_id = id;
+    }
 
     std::string Song::toString() const {
         std::string info = "{Musica: " + _title

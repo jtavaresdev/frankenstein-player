@@ -49,7 +49,7 @@ namespace core {
         unsigned _artist_id;
         mutable std::weak_ptr<Artist> _artist;
         mutable std::vector<unsigned> _featuring_artists_ids;
-        unsigned _album_id;
+        unsigned _album_id = 0;
         mutable std::weak_ptr<Album> _album;
         int _duration;
         std::string _genre;
@@ -102,7 +102,7 @@ namespace core {
          * @param album Referência para o ID do álbum
          */
         Song(unsigned id,
-             const std::string &title,
+             const std::string& title,
              unsigned artist_id,
              unsigned album_id);
 
@@ -174,6 +174,8 @@ namespace core {
         void
         setFeaturingArtists(std::shared_ptr<Artist>&
                                 artist); // TODO overloard p passar o vector
+
+        void setArtistId(unsigned id);
 
         /**
          * @brief Obtém o álbum
@@ -281,7 +283,18 @@ namespace core {
          */
         void setYear(int year);
 
+        /**
+         * @brief Define duracao de uma música para context de test
+         * @param int sec
+         */
         void setDuration(int sec);
+
+        /**
+         * @brief Define id de um album para contexto de test
+         * @param int id
+         */
+        void setAlbumId(unsigned id);
+
         // Métodos
 
         /**

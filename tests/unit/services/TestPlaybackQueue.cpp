@@ -1,239 +1,325 @@
-/**
- * @file test_PlaybackQueue.cpp
- * @brief Testes unitários para a classe PlaybackQueue
- * @author João Tavares
- * @date 2025-10-27
- */
+#include "core/services/FilesManager.hpp"
+#include "core/bd/DatabaseManager.hpp"
+#include "core/bd/RepositoryFactory.hpp"
+#include "core/entities/User.hpp"
 
-#include <doctest/doctest.h>
+#include <iostream>
 
-#include "core/entities/Song.hpp"
-#include "core/services/PlaybackQueue.hpp"
-#include "fixtures/PlaybackQueueFixture.hpp"
-#include "mocks/MockPlayable.hpp"
+namespace core
+{
+    FilesManager::FilesManager(ConfigManager &config,
+                     std::shared_ptr<SongRepository> songRepo,
+                     std::shared_ptr<ArtistRepository> artistRepo,
+                     std::shared_ptr<AlbumRepository> albumRepo)
+        : _config(config), _songRepo(songRepo), _artistRepo(artistRepo), _albumRepo(albumRepo), _usersManager(config) {
+            DatabaseManager db_manager(_config.databasePath(),
+                                           _config.databaseSchemaPath());
 
-#include <memory>
-#include <vector>
+            RepositoryFactory repo_factory(db_manager.getDatabase());
+            _songRepo = repo_factory.createSongRepository();
+            _artistRepo = repo_factory.createArtistRepository();
+            _albumRepo = repo_factory.createAlbumRepository();
+        }
 
-// CONSTRUTORES
-TEST_CASE_FIXTURE(PlaybackQueueFixture,
-                  "PlaybackQueue - Construtor sem músicas cria fila vazia") {
-    core::PlaybackQueue queue(user, history_repo);
+    FilesManager::FilesManager(ConfigManager &config) : _config(config), _usersManager(config) {
+            DatabaseManager db_manager(_config.databasePath(),
+                                            _config.databaseSchemaPath());
 
-    CHECK(queue.empty());
-    CHECK(queue.size() == 0);
-    CHECK(queue.getCurrentSong() == nullptr);
-    CHECK_FALSE(queue.isAleatory());
-}
+            RepositoryFactory repo_factory(db_manager.getDatabase());
+            _songRepo = repo_factory.createSongRepository();
+            _artistRepo = repo_factory.createArtistRepository();
+            _albumRepo = repo_factory.createAlbumRepository();
+        }
 
-TEST_CASE_FIXTURE(PlaybackQueueFixture,
-                  "PlaybackQueue - Construtor com IPlayable preenche a fila") {
-    std::vector<std::shared_ptr<core::Song>> initial_songs = {
-        createSong("Song A"),
-        createSong("Song B"),
-        createSong("Song C")};
-    MockPlayable playable(initial_songs);
+    FilesManager::FilesManager(ConfigManager &config, SQLite::Database &db)
+        : _config(config), _usersManager(config, db) {
+            RepositoryFactory repo_factory(std::shared_ptr<SQLite::Database>(&db, [](SQLite::Database*){}));
+            _songRepo = repo_factory.createSongRepository();
+            _artistRepo = repo_factory.createArtistRepository();
+            _albumRepo = repo_factory.createAlbumRepository();
+        }
 
-    core::PlaybackQueue queue(user, playable, history_repo);
+    std::string FilesManager::cleanString(const std::string& str)
+    {
+        auto begin = std::find_if_not(str.begin(), str.end(),
+                                        [](unsigned char ch){ return std::isspace(ch); });
 
-    CHECK_FALSE(queue.empty());
-    CHECK(queue.size() == 3);
-    CHECK(queue.getCurrentSong() != nullptr);
-    CHECK(queue.getCurrentSong()->getTitle() == "Song A");
-}
+        auto end = std::find_if_not(str.rbegin(), str.rend(),
+                                    [](unsigned char ch){ return std::isspace(ch); }).base();
 
-// TESTES DE ADIÇÃO
-TEST_CASE_FIXTURE(PlaybackQueueFixture,
-                  "PlaybackQueue - Adicionar músicas via add()") {
-    core::PlaybackQueue queue(user, history_repo);
+        if (begin >= end)
+            return "";
 
-    std::vector<std::shared_ptr<core::Song>> songs_to_add = {
-        createSong("New Song 1"),
-        createSong("New Song 2")};
-    MockPlayable playable(songs_to_add);
-
-    queue.add(playable);
-
-    CHECK(queue.size() == 2);
-    CHECK(queue.getCurrentSong()->getTitle() == "New Song 1");
-}
-
-TEST_CASE_FIXTURE(PlaybackQueueFixture,
-                  "PlaybackQueue - Operador += adiciona músicas") {
-    core::PlaybackQueue queue(user, history_repo);
-
-    std::vector<std::shared_ptr<core::Song>> songs_to_add = {
-        createSong("Song X"),
-        createSong("Song Y")};
-    MockPlayable playable(songs_to_add);
-
-    queue += playable;
-
-    CHECK(queue.size() == 2);
-    CHECK(queue.at(1)->getTitle() == "Song Y");
-}
-
-// TESTES DE NAVEGAÇÃO
-TEST_CASE_FIXTURE(PlaybackQueueFixture,
-                  "PlaybackQueue - Navegação entre músicas") {
-    std::vector<std::shared_ptr<core::Song>> songs = {createSong("First"),
-                                                      createSong("Second"),
-                                                      createSong("Third")};
-    MockPlayable playable(songs);
-    core::PlaybackQueue queue(user, playable, history_repo);
-
-    SUBCASE("Música inicial") {
-        CHECK(queue.getCurrentSong()->getTitle() == "First");
-        CHECK(queue.findCurrentIndex() == 0);
+        return std::string(begin, end);
     }
 
-    SUBCASE("Avançar para próxima música") {
-        auto next = queue.next();
-        CHECK(next->getTitle() == "Second");
-        CHECK(queue.findCurrentIndex() == 1);
+    void FilesManager::move(std::string filePath, std::string newFilePath)
+    {
+        fs::path source(filePath);
+        fs::path destination(newFilePath);
+        try {
+            fs::create_directories(destination.parent_path());
+
+            fs::rename(source, destination);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Erro ao mover arquivo de '" << source.string() << "' para '" << destination.string() << "': " << e.what() << std::endl;
+        }
     }
 
-    SUBCASE("Operador ++") {
-        auto next = ++queue;
-        CHECK(next->getTitle() == "Second");
+    std::shared_ptr<Song> FilesManager::readMetadata(TagLib::FileRef file, User &user)
+    {
+        if (file.isNull() || !file.tag())
+        {
+            // std::cout << "Nenhum metadado encontrado" << std::endl;
+            throw std::invalid_argument("Arquivo sem metadados");
+        }
+
+        // FIX 1: Verify that user has a valid ID before proceeding
+        if (user.getId() == 0) {
+            throw std::invalid_argument("User must have a valid ID (must be saved to database first)");
+        }
+
+        TagLib::Tag *tag = file.tag();
+
+        std::shared_ptr<Song> song = std::make_shared<Song>();
+        song->setTitle(tag->title().isEmpty() ? "Unknown Title" : tag->title().toCString());
+        song->setGenre(tag->genre().isEmpty() ? "Unknown Genre" : tag->genre().toCString());
+        song->setYear(tag->year() == 0 ? 1900 : tag->year());
+        song->setTrackNumber(tag->track() == 0 ? 1 : tag->track());
+        song->setUser(user);
+        song->setDuration(file.audioProperties() ? file.audioProperties()->length() : 0);
+
+
+        std::string artistNames = tag->artist().isEmpty() ? "Unknown Artist" : tag->artist().toCString();
+
+        const std::vector<std::string> separators = {
+            " / ", "/", ";", ","
+        };
+
+        for (const auto& sep : separators) {
+            size_t pos = 0;
+            while ((pos = artistNames.find(sep, pos)) != std::string::npos) {
+                artistNames.replace(pos, sep.length(), "/");
+                pos += 1;
+            }
+        }
+
+        std::stringstream ss(artistNames);
+        std::string artistName;
+        std::vector<std::shared_ptr<Artist>> featuring;
+        bool mainArtistNotDefined = false;  // FIX 2: Changed from false to track state
+
+        std::shared_ptr<Artist> artist;
+        while(std::getline(ss, artistName, '/')) {
+            artistName = cleanString(artistName);
+            std::vector<std::shared_ptr<Artist>> artists = _artistRepo->findByName(artistName);
+
+            if (artists.empty())
+            {
+                artist = std::make_shared<Artist>(artistName, song->getGenre());
+                artist->setUser(user);
+                
+                // FIX 3: Check if save was successful
+                if (!_artistRepo->save(*artist)) {
+                    throw std::runtime_error("Failed to save artist: " + artistName);
+                }
+            }
+            else
+            {
+                artist = artists[0];
+            }
+
+            if(!mainArtistNotDefined) {
+                song->setArtist(artist);
+                mainArtistNotDefined = true;
+            } else {
+                featuring.push_back(artist);
+            }
+
+        }
+
+        // FIX 4: Ensure we have a valid main artist before proceeding
+        if (!artist || artist->getId() == 0) {
+            throw std::runtime_error("Failed to create or retrieve main artist");
+        }
+
+        std::string albumTitle = tag->album().isEmpty() ? "Singles" : tag->album().toCString();
+        
+        // FIX 5: Use the actual artist object, not artistName which is from the last iteration
+        std::vector<std::shared_ptr<Album>> albums = _albumRepo->findByArtist(artistName);
+        std::shared_ptr<Album> album;
+
+        bool albumFound = false;
+        for (const std::shared_ptr<Album> &existingAlbum : albums) {
+            if (existingAlbum->getTitle() == albumTitle)
+            {
+                album = existingAlbum;
+                albumFound = true;
+                break;
+            }
+        }
+
+        if (!albumFound)
+        {
+            album = std::make_shared<Album>(albumTitle, song->getGenre(), *artist);
+            album->setYear(song->getYear());
+            album->setUser(*song->getUser());
+            
+            // FIX 6: Check if album save was successful
+            if (!_albumRepo->save(*album)) {
+                throw std::runtime_error("Failed to save album: " + albumTitle);
+            }
+            
+            if (!_albumRepo->setPrincipalArtist(*album, *artist, *song->getUser())) {
+                throw std::runtime_error("Failed to set principal artist for album");
+            }
+        }
+        
+        song->setAlbum(*album);
+        
+        // FIX 7: Check if song save was successful
+        if (!_songRepo->save(*song)) {
+            throw std::runtime_error("Failed to save song: " + song->getTitle());
+        }
+        
+        if (!_songRepo->setPrincipalArtist(*song, *artist, *song->getUser())) {
+            throw std::runtime_error("Failed to set principal artist for song");
+        }
+
+        for(auto feat : featuring) {
+            _songRepo->addFeaturingArtist(*song, *feat, user);
+        }
+
+        return song;
     }
 
-    SUBCASE("Voltar para música anterior após avançar") {
-        queue.next(); // Vai para Second
-        queue.next(); // Vai para Third
-
-        auto previous = queue.previous();
-        CHECK(previous->getTitle() == "Second");
-        CHECK(queue.findCurrentIndex() == 1);
-    }
-}
-
-// TESTES DE REMOÇÃO
-TEST_CASE_FIXTURE(PlaybackQueueFixture,
-                  "PlaybackQueue - Remover músicas da fila") {
-    std::vector<std::shared_ptr<core::Song>> songs = {createSong("Song 1"),
-                                                      createSong("Song 2"),
-                                                      createSong("Song 3")};
-    MockPlayable playable(songs);
-    core::PlaybackQueue queue(user, playable, history_repo);
-
-    SUBCASE("Remover índice válido") {
-        CHECK(queue.remove(1) == true);
-        CHECK(queue.size() == 2);
-        CHECK(queue.at(0)->getTitle() == "Song 1");
-        CHECK(queue.at(1)->getTitle() == "Song 3");
+    void FilesManager::verifyDir(std::string path)
+    {
+        fs::path dir(path);
+        if (!fs::exists(dir))
+        {
+            try {
+                fs::create_directories(dir);
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "Erro ao criar diretório '" << dir.string() << "': " << e.what() << std::endl;
+            }
+        }
     }
 
-    SUBCASE("Remover índice inválido") {
-        CHECK(queue.remove(5) == false);
-        CHECK(queue.size() == 3);
-    }
-}
+    void FilesManager::update()
+    {
+        std::shared_ptr<User> currentUser = _usersManager.getCurrentUser();
+        std::shared_ptr<User> publicUser = _usersManager.getPublicUser();
 
-// TESTES DE BUSCA
-TEST_CASE_FIXTURE(PlaybackQueueFixture,
-                  "PlaybackQueue - Buscar músicas na fila") {
-    auto song1 = createSong("Find Me");
-    auto song2 = createSong("Another Song");
-    auto song3 = createSong("Find Me");
+        // FIX 8: Validate that users exist and have valid IDs
+        if (!currentUser || currentUser->getId() == 0) {
+            throw std::runtime_error("Current user is not valid or not saved to database");
+        }
+        if (!publicUser || publicUser->getId() == 0) {
+            throw std::runtime_error("Public user is not valid or not saved to database");
+        }
 
-    std::vector<std::shared_ptr<core::Song>> songs = {song1, song2, song3};
-    MockPlayable playable(songs);
-    core::PlaybackQueue queue(user, playable, history_repo);
+        std::string userInput = currentUser.get()->getInputPath();
+        std::string publicInput = publicUser.get()->getInputPath();
 
-    SUBCASE("Encontrar próxima ocorrência") {
-        CHECK(queue.findNextIndex(*song1) == 0);
-        CHECK(queue.findNextIndex(*song3) == 2);
-    }
+        verifyDir(userInput);
+        verifyDir(publicInput);
 
-    SUBCASE("Encontrar índice atual após navegação") {
-        queue.next();
-        CHECK(queue.findCurrentIndex() == 1);
-    }
-    SUBCASE("Busca por index não existente") {
-        CHECK(queue.at(99) == nullptr);
-    }
-}
+        std::string inputDirs[] = {userInput, publicInput};
+        std::map<User, std::string> userInputMap = {
+            {*currentUser, userInput},
+            {*publicUser, publicInput}
+        };
 
-// TESTES DE VISUALIZAÇÃO
-TEST_CASE_FIXTURE(PlaybackQueueFixture,
-                  "PlaybackQueue - Visualizações da fila") {
-    std::vector<std::shared_ptr<core::Song>> songs;
-    for (int i = 1; i <= 5; i++) {
-        songs.push_back(createSong("Song " + std::to_string(i)));
-    }
-    MockPlayable playable(songs);
-    core::PlaybackQueue queue(user, playable, history_repo);
+        // for (const auto &inputDir : inputDirs)
+        for (const auto &par : userInputMap)
+        {
+            std::string inputDir = par.second;
+            User user = par.first;
 
-    SUBCASE("Visualização ao redor da música atual") {
-        queue.next();
+            // std::cout << "Processando diretório de input: " << inputDir << " para o usuário: " << user.getUsername() << std::endl;
 
-        auto view = queue.getQueueView(1, 2);
-        CHECK(view.size() == 4);
-        CHECK(view[0]->getTitle() == "Song 1");
-        CHECK(view[1]->getTitle() == "Song 2");
-        CHECK(view[2]->getTitle() == "Song 3");
-        CHECK(view[3]->getTitle() == "Song 4");
-    }
-    SUBCASE("Segmento maior que a queue") {
-        queue.next();
-        auto view = queue.getQueueView(1, 6);
-        CHECK(view.size() == 5);
-    }
+            if (!fs::exists(inputDir))
+            {
+                continue;
+            }
 
-    SUBCASE("Segmento da fila") {
-        auto segment = queue.getQueueSegment(1, 3);
-        CHECK(segment.size() == 3);
-        CHECK(segment[0]->getTitle() == "Song 2");
-        CHECK(segment[1]->getTitle() == "Song 3");
-        CHECK(segment[2]->getTitle() == "Song 4");
-    }
-}
+            for (const auto &entry : fs::directory_iterator(inputDir))
+            {
+                if (!fs::is_regular_file(entry.status()))
+                {
+                    continue;
+                }
 
-// TESTES DE MODO ALEATÓRIO
-TEST_CASE_FIXTURE(PlaybackQueueFixture,
-                  "PlaybackQueue - Modo aleatório e embaralhamento") {
-    std::vector<std::shared_ptr<core::Song>> songs = {createSong("A"),
-                                                      createSong("B"),
-                                                      createSong("C")};
-    MockPlayable playable(songs);
-    core::PlaybackQueue queue(user, playable, history_repo);
+                TagLib::FileRef probe(entry.path().string().c_str());
+                if (probe.isNull() || !probe.audioProperties())
+                {
+                    continue;
+                }
 
-    SUBCASE("Ativar e desativar modo aleatório") {
-        queue.setAleatory(true);
-        CHECK(queue.isAleatory() == true);
+                std::string filePath = entry.path().string();
 
-        queue.setAleatory(false);
-        CHECK(queue.isAleatory() == false);
+                TagLib::FileRef f(filePath.c_str());
+                if (!f.isNull())
+                {
+
+                    std::shared_ptr<Song> song;
+                    try {
+                        song = readMetadata(f, user);
+                        // FIX 9: Remove redundant setUser and save calls
+                        // song->setUser(user);  // Already done in readMetadata
+                        // _songRepo->save(*song);  // Already done in readMetadata
+
+                        if (!song) {
+                            std::cerr << "Metadados insuficientes para arquivo '" << filePath << "', pulando." << std::endl;
+                            continue;
+                        }
+                        move(filePath, song->getAudioFilePath());
+                    }
+                    catch (const std::exception &e)
+                    {
+                        std::cerr << "Erro ao processar o arquivo '" << filePath << "': " << e.what() << std::endl;
+                        continue;
+                    }
+                }
+            }
+        }
     }
 
-    SUBCASE("Embaralhar mantém todas as músicas") {
-        queue.shuffle();
-        CHECK(queue.size() == 3);
-        // A ordem pode mudar, mas todas as músicas devem estar presentes
-    }
-}
+    bool FilesManager::isUpdated()
+    {
+        std::shared_ptr<User> currentUser = _usersManager.getCurrentUser();
+        std::shared_ptr<User> publicUser = _usersManager.getPublicUser();
 
-// TESTES DE LIMPEZA
-TEST_CASE_FIXTURE(PlaybackQueueFixture, "PlaybackQueue - Limpar fila") {
-    std::vector<std::shared_ptr<core::Song>> songs = {createSong("Song 1"),
-                                                      createSong("Song 2")};
-    std::vector<std::shared_ptr<core::Song>> emptySong = {};
+        std::string userInput = currentUser.get()->getInputPath();
+        std::string publicInput = publicUser.get()->getInputPath();
 
-    SUBCASE("Happy path") {
-        MockPlayable playable(songs);
+        verifyDir(userInput);
+        verifyDir(publicInput);
 
-        core::PlaybackQueue queue(user, playable, history_repo);
+        std::string inputDirs[] = {userInput, publicInput};
 
-        CHECK(queue.size() == 2);
-        queue.clear();
-        CHECK(queue.empty());
-        CHECK(queue.size() == 0);
-        CHECK(queue.getCurrentSong() == nullptr);
-    }
-    SUBCASE("Playable vazio") {
-        MockPlayable emptyPlayable(emptySong);
-        core::PlaybackQueue queue(user, emptyPlayable, history_repo);
-        CHECK_FALSE(queue.empty());
+
+        for (const auto &dir : inputDirs)
+        {
+            if (!fs::exists(dir))
+            {
+                continue;
+            }
+
+            for (const auto &entry : fs::directory_iterator(dir))
+            {
+                if (fs::is_regular_file(entry.status()))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

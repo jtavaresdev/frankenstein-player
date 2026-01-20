@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 
+#include <iostream>
 #include <memory>
 #include <vector>
 #include <string>
@@ -36,7 +37,7 @@ TEST_SUITE("Unit Tests - UserRepository") {
         auto all_users = repo.getAll();
         CHECK(all_users.size() == 1);
         CHECK(all_users[0]->getUsername() == "usuario1");
-        CHECK(all_users[0]->getHomePath() == "/home/usuario1");
+        CHECK(all_users[0]->getHomePath() == "/home/usuario1/");
         #ifdef _WIN32
             CHECK(all_users[0]->getUID() == "winuid1");
         #else
@@ -71,7 +72,7 @@ TEST_SUITE("Unit Tests - UserRepository") {
 
         auto updated_user = repo.findById(all_users[0]->getId());
         CHECK(updated_user != nullptr);
-        CHECK(updated_user->getHomePath() == "/home/usuario2_mod");
+        CHECK(updated_user->getHomePath() == "/home/usuario2_mod/");
         #ifdef _WIN32
             CHECK(updated_user->getUID() == "winuid2_mod");
         #else
@@ -101,7 +102,11 @@ TEST_SUITE("Unit Tests - UserRepository") {
 
         core::User user1("alice");
         core::User user2("bob");
-        core::User user3("alice");
+        core::User user3("linux");
+        
+        user1.setUID(1);
+        user2.setUID(2);
+        user3.setUID(3);
 
         CHECK(repo.save(user1) == true);
         CHECK(repo.save(user2) == true);
@@ -123,8 +128,26 @@ TEST_SUITE("Unit Tests - UserRepository") {
         CHECK(repo.getAll().empty());
 
         core::User user1("u1");
+         #ifdef _WIN32
+            user1.setUID("winuid1");
+        #else
+            user1.setUID(101);
+        #endif
+
         core::User user2("u2");
+        #ifdef _WIN32
+            user2.setUID("winuid2");
+        #else
+            user2.setUID(102);
+        #endif
+            
         core::User user3("u3");
+        #ifdef _WIN32
+            user3.setUID("winuid3");
+        #else
+            user3.setUID(103);
+        #endif
+        
 
         CHECK(repo.save(user1) == true);
         CHECK(repo.save(user2) == true);

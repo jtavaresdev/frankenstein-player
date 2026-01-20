@@ -39,9 +39,10 @@ TEST_SUITE("HISTÓRIA DE USUÁRIO: Reprodução de Música") {
 
             artist =
                 std::make_shared<core::Artist>(short_song_mock.artist, "Test");
+
             album = std::make_shared<core::Album>(short_song_mock.album,
-                                                  artist,
-                                                  artist->getGenre());
+                                                  artist->getGenre(),
+                                                  *artist);
 
             short_song = std::make_shared<core::Song>(short_song_mock.title,
                                                       *artist,
