@@ -102,7 +102,7 @@ namespace core {
 		 * @brief Construtor de cópia da classe Artist
 		 * @param other Outro objeto Artist para copiar
 		 */
-        Artist(const Artist &other) = default;
+        Artist(const Artist &other);
 
         /**
          * @brief Operador de atribuição da classe Artist

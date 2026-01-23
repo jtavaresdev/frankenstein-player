@@ -82,7 +82,7 @@ namespace core {
 		 *
 		 * @param other Usuário a ser copiado
 		 */
-        User(const User &other) = default;
+        User(const User &other);
 
         /**
 		 * @brief Operador de atribuição

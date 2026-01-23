@@ -122,7 +122,7 @@ namespace core {
          * @brief Construtor de cópia da classe Song
          * @param other Outro objeto Song para copiar
          */
-        Song(const Song& other) = default;
+        Song(const Song& other);
 
         /**
          * @brief Operador de atribuição da classe Song
@@ -271,7 +271,7 @@ namespace core {
          * @brief Define o álbum
          * @param album Novo álbum
          */
-        void setAlbum(const Album& album);
+        void setAlbum(std::shared_ptr<Album>& album);
         /**
          * @brief Define o gênero
          * @param genre Novo gênero

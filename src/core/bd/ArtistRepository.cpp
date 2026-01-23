@@ -4,6 +4,7 @@
 #include "core/bd/AlbumRepository.hpp"
 #include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/bd/SongRepository.hpp"
+#include "core/bd/UserRepository.hpp"
 #include <memory>
 
 /*
@@ -23,9 +24,10 @@ namespace core {
 
     bool ArtistRepository::insert(Artist& entity) {
         if (!entity.getUser())
-            throw std::invalid_argument("Artist must be associated with a User.");
+            throw std::invalid_argument(
+                "Artist must be associated with a User.");
         std::string sql = "INSERT INTO " + _table_name + " (name, user_id) "
-                            + "VALUES(?, ?);";
+                          + "VALUES(?, ?);";
         SQLite::Statement query = prepare(sql);
         query.bind(1, entity.getName());
         query.bind(2, entity.getUser()->getId());
@@ -56,10 +58,38 @@ namespace core {
         std::string name = query.getColumn("name").getString();
         unsigned user_id = query.getColumn("user_id").getInt();
 
-        // return std::make_shared<Artist>(id, name, user_id);
-        // TODO carregar usuário do artista
-        return std::make_shared<Artist>();
-    };
+        auto user_repo = UserRepository(_db);
+        auto user_ptr = user_repo.findById(user_id);
+
+        if (!user_ptr) {
+            throw std::runtime_error("Usuário não encontrado para artista id "
+                                     + std::to_string(id));
+        }
+
+        auto artist = std::make_shared<Artist>(id, name, *user_ptr);
+
+        auto songs_loader = [this, id]() -> std::vector<std::shared_ptr<Song>> {
+            auto artist_ptr = this->findById(id);
+            if (artist_ptr) {
+                return this->getSongs(*artist_ptr);
+            }
+            return std::vector<std::shared_ptr<Song>>();
+        };
+
+        auto albums_loader = [this,
+                              id]() -> std::vector<std::shared_ptr<Album>> {
+            auto artist_ptr = this->findById(id);
+            if (artist_ptr) {
+                return this->getAlbums(*artist_ptr);
+            }
+            return std::vector<std::shared_ptr<Album>>();
+        };
+
+        artist->setSongsLoader(songs_loader);
+        artist->setAlbumsLoader(albums_loader);
+
+        return artist;
+    }
 
     bool ArtistRepository::save(Artist& entity) {
         if (entity.getId() == 0) {
@@ -121,4 +151,4 @@ namespace core {
         return song_repository.findByArtist(artist);
     };
 
-};  // namespace core
+}; // namespace core

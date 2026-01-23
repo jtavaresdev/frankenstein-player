@@ -42,6 +42,14 @@ namespace core {
         _uid(uid),
         _is_current_user(false) {}
 
+    User::User(const User& other):
+        Entity(other.getId()),       
+        _username(other._username),
+        _home_path(other._home_path),
+        _input_path(other._input_path),
+        _uid(other._uid),
+        _is_current_user(other._is_current_user) {}
+
     std::string User::getUsername() const {
         return _username;
     }

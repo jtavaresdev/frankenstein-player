@@ -134,6 +134,7 @@ namespace core {
     }
 
     int PlaybackQueue::findNextIndex(const Song& song) const {
+
         for (size_t i = _current + 1; i < _queue.size(); ++i) {
             if ((!_aleatory && *_queue[i] == song) ||
                 (_aleatory && *_queue[_indices_aleatory[i]] == song))

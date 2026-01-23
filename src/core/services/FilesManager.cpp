@@ -4,6 +4,7 @@
 #include "core/entities/User.hpp"
 
 #include <iostream>
+#include <ostream>
 
 namespace core
 {
@@ -19,6 +20,7 @@ namespace core
             _songRepo = repo_factory.createSongRepository();
             _artistRepo = repo_factory.createArtistRepository();
             _albumRepo = repo_factory.createAlbumRepository();
+            _userRepo = repo_factory.createUserRepository();
         }
 
     FilesManager::FilesManager(ConfigManager &config) : _config(config), _usersManager(config) {
@@ -29,6 +31,7 @@ namespace core
             _songRepo = repo_factory.createSongRepository();
             _artistRepo = repo_factory.createArtistRepository();
             _albumRepo = repo_factory.createAlbumRepository();
+            _userRepo = repo_factory.createUserRepository();
         }
 
     FilesManager::FilesManager(ConfigManager &config, SQLite::Database &db)
@@ -37,6 +40,7 @@ namespace core
             _songRepo = repo_factory.createSongRepository();
             _artistRepo = repo_factory.createArtistRepository();
             _albumRepo = repo_factory.createAlbumRepository();
+            _userRepo = repo_factory.createUserRepository();
         }
 
     std::string FilesManager::cleanString(const std::string& str)
@@ -68,7 +72,7 @@ namespace core
         }
     }
 
-    std::shared_ptr<Song> FilesManager::readMetadata(TagLib::FileRef file, User &user)
+    std::shared_ptr<Song> FilesManager::readMetadata(TagLib::FileRef file, User &user, const std::string& sourceFilePath)
     {
         if (file.isNull() || !file.tag())
         {
@@ -104,13 +108,13 @@ namespace core
         std::stringstream ss(artistNames);
         std::string artistName;
         std::vector<std::shared_ptr<Artist>> featuring;
-        bool mainArtistNotDefined = false;
+        bool mainArtistDefined = false;
 
-        std::shared_ptr<Artist> artist;
+        std::shared_ptr<Artist> mainArtist;
         while(std::getline(ss, artistName, '/')) {
             artistName = cleanString(artistName);
             std::vector<std::shared_ptr<Artist>> artists = _artistRepo->findByName(artistName);
-
+            std::shared_ptr<Artist> artist;
             if (artists.empty())
             {
                 artist = std::make_shared<Artist>(artistName, song->getGenre());
@@ -122,23 +126,30 @@ namespace core
                 artist = artists[0];
             }
 
-            if(!mainArtistNotDefined) {
-                song->setArtist(artist);
-                mainArtistNotDefined = true;
+            if(!mainArtistDefined) {
+                mainArtist = artist;
+                song->setArtist(mainArtist);
+                mainArtistDefined = true;
             } else {
                 featuring.push_back(artist);
             }
 
         }
 
+        if (!mainArtist) {
+            throw std::runtime_error("No artist found in metadata");
+        }
 
         std::string albumTitle = tag->album().isEmpty() ? "Singles" : tag->album().toCString();
-        std::vector<std::shared_ptr<Album>> albums = _albumRepo->findByArtist(artistName);
+        std::vector<std::shared_ptr<Album>> albums = _albumRepo->findByArtist(mainArtist->getName());
         std::shared_ptr<Album> album;
 
         bool albumFound = false;
         for (const std::shared_ptr<Album> &existingAlbum : albums) {
-            if (existingAlbum->getTitle() == albumTitle)
+
+            if (existingAlbum->getTitle() == albumTitle && 
+                existingAlbum->getUser() && 
+                existingAlbum->getUser()->getId() == user.getId())
             {
                 album = existingAlbum;
                 albumFound = true;
@@ -148,20 +159,29 @@ namespace core
 
         if (!albumFound)
         {
-            album = std::make_shared<Album>(albumTitle, song->getGenre(), *artist);
+            album = std::make_shared<Album>(albumTitle, song->getGenre(), *mainArtist);
             album->setYear(song->getYear());
             album->setUser(*song->getUser());
-            _albumRepo->save(*album);
-            _albumRepo->setPrincipalArtist(*album, *artist, *song->getUser());
-        }
-        song->setAlbum(*album);
-        _songRepo->save(*song);
-        _songRepo->setPrincipalArtist(*song, *artist, *song->getUser());
 
+            _albumRepo->save(*album);
+            _albumRepo->setPrincipalArtist(*album, *mainArtist, *song->getUser());
+        }
+
+        song->setAlbum(album);  
+
+        _songRepo->save(*song);
+        
+        _songRepo->setPrincipalArtist(*song, *mainArtist, *song->getUser());
+        
         for(auto feat : featuring) {
             _songRepo->addFeaturingArtist(*song, *feat, user);
         }
 
+        std::string destinationPath = song->getAudioFilePath();
+        if (!sourceFilePath.empty()) {
+            move(sourceFilePath, destinationPath);
+        }
+        
         return song;
     }
 
@@ -182,40 +202,50 @@ namespace core
 
     void FilesManager::update()
     {
-        std::shared_ptr<User> currentUser = _usersManager.getCurrentUser();
-        std::shared_ptr<User> publicUser = _usersManager.getPublicUser();
+        std::vector<std::shared_ptr<User>> allUsers;
+        
+        if (_userRepo) {
+            allUsers = _userRepo->getAll();
+        } else {
+            std::cerr << "DEBUG update(): _userRepo é NULL!" << std::endl;
+        }
+        
+        if (allUsers.empty()) {
+            std::shared_ptr<User> currentUser = _usersManager.getCurrentUser();
+            std::shared_ptr<User> publicUser = _usersManager.getPublicUser();
+            
+            if (currentUser) {
+                allUsers.push_back(currentUser);
+            }
+            if (publicUser && (!currentUser || publicUser->getId() != currentUser->getId())) {
+                allUsers.push_back(publicUser);
+            }
+        }
 
-        std::string userInput = currentUser.get()->getInputPath();
-        std::string publicInput = publicUser.get()->getInputPath();
-
-        verifyDir(userInput);
-        verifyDir(publicInput);
-
-        std::string inputDirs[] = {userInput, publicInput};
-        std::map<User, std::string> userInputMap = {
-            {*currentUser, userInput},
-            {*publicUser, publicInput}
-        };
-
-        // for (const auto &inputDir : inputDirs)
-        for (const auto &par : userInputMap)
+        for (const auto &user : allUsers)
         {
-            std::string inputDir = par.second;
-            User user = par.first;
+            if (!user || user->getId() == 0) {
+                continue;
+            }
 
-            // std::cout << "Processando diretório de input: " << inputDir << " para o usuário: " << user.getUsername() << std::endl;
+            std::string inputDir = user->getInputPath();
+            
+            verifyDir(inputDir);
 
             if (!fs::exists(inputDir))
             {
                 continue;
             }
 
+            int fileCount = 0;
             for (const auto &entry : fs::directory_iterator(inputDir))
             {
                 if (!fs::is_regular_file(entry.status()))
                 {
                     continue;
                 }
+
+                fileCount++;
 
                 TagLib::FileRef probe(entry.path().string().c_str());
                 if (probe.isNull() || !probe.audioProperties())
@@ -231,14 +261,13 @@ namespace core
 
                     std::shared_ptr<Song> song;
                     try {
-                        song = readMetadata(f, user);
-                        _songRepo->save(*song);
+                        song = readMetadata(f, *user, filePath);
 
                         if (!song) {
                             std::cerr << "Metadados insuficientes para arquivo '" << filePath << "', pulando." << std::endl;
                             continue;
                         }
-                        move(filePath, song->getAudioFilePath());
+                        // File already moved by readMetadata
                     }
                     catch (const std::exception &e)
                     {
@@ -247,6 +276,7 @@ namespace core
                     }
                 }
             }
+            
         }
     }
 
