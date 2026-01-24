@@ -7,6 +7,7 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
+#include <algorithm>
 
 namespace core {
     Album::Album() : songsLoader([]() {return std::vector<std::shared_ptr<Song>>();}) {};
@@ -42,10 +43,10 @@ namespace core {
         songsLoader([]() {return std::vector<std::shared_ptr<Song>>();}) {}
 
     Album::Album(unsigned id,
-                std::string title,
-                int year,
-                std::string genre,
-                const Artist &artist)
+                 std::string title,
+                 int year,
+                 std::string genre,
+                 const Artist& artist)
         : Entity(id),
         _title(title),
         _genre(genre),
@@ -87,7 +88,8 @@ namespace core {
     std::vector<std::shared_ptr<const Artist>>
     Album::getFeaturingArtists() const {
         if (!featuringArtistsLoader) {
-            throw std::runtime_error("Featuring Artists Loader nao foi definido");
+            throw std::runtime_error(
+                "Featuring Artists Loader nao foi definido");
         }
 
         auto allArtists = featuringArtistsLoader();
@@ -134,32 +136,32 @@ namespace core {
         return _songs;
     }
 
-    void Album::setArtist(const Artist &artist) {
+    void Album::setArtist(const Artist& artist) {
         if (artist.getId() == 0) {
             throw std::invalid_argument("Artist nao pode ser nulo");
         }
         _artist_id = artist.getId();
     };
 
-    void Album::setFeaturingArtists(const std::vector<Artist> &artists) {
+    void Album::setFeaturingArtists(const std::vector<Artist>& artists) {
         if (!artists.empty()) {
             throw std::invalid_argument("Parametro vazio");
         }
 
         _featuring_artists_ids.clear();
-        for (auto const &a : artists) {
+        for (auto const& a : artists) {
             _featuring_artists_ids.push_back(a.getId());
         }
     };
 
-    void Album::setTitle(const std::string &title) {
+    void Album::setTitle(const std::string& title) {
         if (title.empty()) {
             throw std::invalid_argument("Título do álbum não pode estar vazio");
         }
         _title = title;
     };
 
-    void Album::setGenre(const std::string &genre) {
+    void Album::setGenre(const std::string& genre) {
         if (genre.empty()) {
             throw std::invalid_argument("Genre nao pode ser vazio");
         }
@@ -170,12 +172,12 @@ namespace core {
         _year = year;
     };
 
-    void Album::setUser(const User &user) {
+    void Album::setUser(const User& user) {
         _user = std::make_shared<User>(user);
     };
 
     void Album::setArtistLoader(
-        const std::function<std::shared_ptr<Artist>()> &loader) {
+        const std::function<std::shared_ptr<Artist>()>& loader) {
         if (!loader) {
             throw std::invalid_argument("Loader nao pode ser null");
         }
@@ -183,7 +185,7 @@ namespace core {
     };
 
     void Album::setFeaturingArtistsLoader(
-        const std::function<std::vector<std::shared_ptr<Artist>>()> &loader) {
+        const std::function<std::vector<std::shared_ptr<Artist>>()>& loader) {
         if (!loader) {
             throw std::invalid_argument("Loader nao pode ser null");
         }
@@ -191,43 +193,46 @@ namespace core {
     };
 
     void Album::setSongsLoader(
-        const std::function<std::vector<std::shared_ptr<Song>>()> &
-            loader) {
+        const std::function<std::vector<std::shared_ptr<Song>>()>& loader) {
         songsLoader = loader;
     };
 
     std::string Album::toString() const {
-        std::string info = "{Album: " + _title + ", Artista: " + getArtist()->getName() + ", Ano: " + std::to_string(_year) + "}";
+        std::string info = "{Album: " + _title
+                           + ", Artista: " + getArtist()->getName()
+                           + ", Ano: " + std::to_string(_year) + "}";
 
         return info;
     };
     // Entity
 
-    bool Album::operator==(const Entity &other) const {
-        const Album *otherAlbum = dynamic_cast<const Album *>(&other);
+    bool Album::operator==(const Entity& other) const {
+        const Album* otherAlbum = dynamic_cast<const Album*>(&other);
         // assert(otherAlbum != nullptr);
         if (otherAlbum == nullptr) {
             throw std::invalid_argument("Erro no casting");
         }
-        if (otherAlbum->_title == this->_title && otherAlbum->getSongsCount() == this->getSongsCount()) {
+        if (otherAlbum->_title == this->_title
+            && otherAlbum->getSongsCount() == this->getSongsCount()) {
             return true;
         }
         return false;
     };
-    bool Album::operator!=(const Entity &other) const {
-        const Album *otherAlbum = dynamic_cast<const Album *>(&other);
+    bool Album::operator!=(const Entity& other) const {
+        const Album* otherAlbum = dynamic_cast<const Album*>(&other);
         // assert(otherAlbum != nullptr);
         if (otherAlbum == nullptr) {
             throw std::invalid_argument("Erro no casting");
         }
 
-        if (otherAlbum->_title == this->_title && otherAlbum->getSongsCount() == this->getSongsCount()) {
+        if (otherAlbum->_title == this->_title
+            && otherAlbum->getSongsCount() == this->getSongsCount()) {
             return false;
         }
         return true;
     };
-    bool Album::operator<(const Entity &other) const {
-        const Album *otherAlbum = dynamic_cast<const Album *>(&other);
+    bool Album::operator<(const Entity& other) const {
+        const Album* otherAlbum = dynamic_cast<const Album*>(&other);
         if (otherAlbum == nullptr) {
             throw std::invalid_argument("Erro no casting");
         }
@@ -235,15 +240,15 @@ namespace core {
             return this->getYear() < otherAlbum->getYear();
         return this->getTitle() < otherAlbum->getTitle();
     };
-    bool Album::operator<=(const Entity &other) const {
-        const Album *otherAlbum = dynamic_cast<const Album *>(&other);
+    bool Album::operator<=(const Entity& other) const {
+        const Album* otherAlbum = dynamic_cast<const Album*>(&other);
         if (otherAlbum == nullptr) {
             throw std::invalid_argument("Erro no casting");
         }
         return *this < *otherAlbum || *this == *otherAlbum;
     };
-    bool Album::operator>(const Entity &other) const {
-        const Album *otherAlbum = dynamic_cast<const Album *>(&other);
+    bool Album::operator>(const Entity& other) const {
+        const Album* otherAlbum = dynamic_cast<const Album*>(&other);
         if (otherAlbum == nullptr) {
             throw std::invalid_argument("Erro no casting");
         }
@@ -251,8 +256,8 @@ namespace core {
             return this->getYear() > otherAlbum->getYear();
         return this->getTitle() > otherAlbum->getTitle();
     };
-    bool Album::operator>=(const Entity &other) const {
-        const Album *otherAlbum = dynamic_cast<const Album *>(&other);
+    bool Album::operator>=(const Entity& other) const {
+        const Album* otherAlbum = dynamic_cast<const Album*>(&other);
         if (otherAlbum == nullptr) {
             throw std::invalid_argument("Erro no casting");
         }
@@ -265,7 +270,7 @@ namespace core {
         std::vector<std::shared_ptr<IPlayableObject>> v;
         v.reserve(_songs.size());
 
-        for (auto const &s : _songs) {
+        for (auto const& s : _songs) {
             v.push_back(s);
         }
 
@@ -278,14 +283,14 @@ namespace core {
         std::vector<std::shared_ptr<Song>> v;
         v.reserve(_songs.size() + 5);
 
-        for (auto const &s : _songs) {
+        for (auto const& s : _songs) {
             v.push_back(s);
         }
 
         return v;
     }
 
-    void Album::addSong(const Song &song) {
+    void Album::addSong(const Song& song) {
         loadSongs();
         if (containsSong(song))
             return;
@@ -294,8 +299,11 @@ namespace core {
 
     bool Album::removeSong(unsigned id) {
         loadSongs();
-        auto it = std::find_if(_songs.begin(), _songs.end(),
-            [id](const std::shared_ptr<Song>& song) { return song->getId() == id; });
+        auto it = std::find_if(_songs.begin(),
+                               _songs.end(),
+                               [id](const std::shared_ptr<Song>& song) {
+                                   return song->getId() == id;
+                               });
 
         if (it == _songs.end())
             return false;
@@ -306,7 +314,7 @@ namespace core {
 
     std::shared_ptr<Song> Album::findSongById(unsigned songId) {
         loadSongs();
-        for (const auto &song : _songs) {
+        for (const auto& song : _songs) {
             if (song && song->getId() == songId) {
                 return song;
             }
@@ -315,12 +323,12 @@ namespace core {
     }
 
     std::vector<std::shared_ptr<Song>>
-    Album::findSongByTitle(const std::string &title) {
+    Album::findSongByTitle(const std::string& title) {
         loadSongs();
 
         std::vector<std::shared_ptr<Song>> result;
 
-        for (auto const &s : _songs) {
+        for (auto const& s : _songs) {
             if (s && s->getTitle() == title) {
                 std::cout << "Found song: " << s->getTitle() << std::endl;
                 result.push_back(s);
@@ -332,7 +340,7 @@ namespace core {
     unsigned Album::calculateTotalDuration() {
         loadSongs();
         int totalSeconds = 0;
-        for (auto const &s : _songs) {
+        for (auto const& s : _songs) {
             totalSeconds += s->getDuration();
         }
         return totalSeconds;
@@ -352,7 +360,7 @@ namespace core {
 
         try {
             return this->operator[](index);
-        } catch (const std::out_of_range &e) {
+        } catch (const std::out_of_range& e) {
             return nullptr;
         }
     };
@@ -360,7 +368,8 @@ namespace core {
     std::shared_ptr<Song> Album::operator[](int index) {
         loadSongs();
         if (index < 0 || static_cast<size_t>(index) >= _songs.size()) {
-            throw std::out_of_range("Índice fora dos limites: " + std::to_string(index));
+            throw std::out_of_range("Índice fora dos limites: "
+                                    + std::to_string(index));
         }
         return _songs.at(static_cast<size_t>(index));
     }
