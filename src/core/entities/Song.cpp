@@ -1,4 +1,3 @@
-
 #include "core/entities/Song.hpp"
 #include "core/bd/ArtistRepository.hpp"
 #include "core/bd/SongRepository.hpp"
@@ -32,16 +31,13 @@ namespace core {
           _duration(0) {};
 
     Song::Song(unsigned id,
-               const std::string &title,
+               const std::string& title,
                unsigned artist_id,
                unsigned album_id)
         : Entity(id),
           _title(title),
           _artist_id(artist_id),
-          _album_id(album_id)
-    // Construtor focado em IDs para integração com banco de dados
-    {
-    }
+          _album_id(album_id) {};
 
     Song::Song(const std::string& title,
                const Artist& artist,
@@ -53,6 +49,24 @@ namespace core {
           _artist(std::make_shared<Artist>(artist)),
           _album_id(album.getId()),
           _album(std::make_shared<Album>(album)) {
+    }
+
+    Song::Song(const Song& other)
+        : Entity(other.getId()),
+          _title(other._title),
+          _duration(other._duration),
+          _year(other._year),
+          _track_number(other._track_number),
+          _genre(other._genre),
+          _user(other._user ? std::make_shared<User>(*other._user) : nullptr),
+          _artist_id(other._artist_id),
+          _album_id(other._album_id),
+          _artist(other._artist), // Copiar weak_ptr
+          _album(other._album),   // Copiar weak_ptr
+          _featuring_artists_ids(other._featuring_artists_ids),
+          artistLoader(other.artistLoader),
+          albumLoader(other.albumLoader),
+          featuringArtistsLoader(other.featuringArtistsLoader) {
     }
 
     // Getters
@@ -80,7 +94,7 @@ namespace core {
     std::vector<unsigned> Song::getFeaturingArtistsId() const {
         auto _featuring_artists = featuringArtistsLoader();
         _featuring_artists_ids.clear();
-        for (auto const &a : _featuring_artists)
+        for (auto const& a : _featuring_artists)
             _featuring_artists_ids.push_back(a->getId());
 
         return std::vector<unsigned>(_featuring_artists_ids);
@@ -191,6 +205,9 @@ namespace core {
 
     void Song::setArtist(std::shared_ptr<Artist>& artist) {
         this->_artist = artist;
+        if (artist) {
+            this->_artist_id = artist->getId();
+        }
     };
 
     void Song::setArtistLoader(
@@ -218,8 +235,9 @@ namespace core {
         albumLoader = loader;
     };
 
-    void Song::setAlbum(const Album& album) {
-        _album = std::make_shared<Album>(album);
+    void Song::setAlbum(std::shared_ptr<Album>& album) {
+        _album = album;
+        _album_id = album->getId();
     };
 
     void Song::setGenre(const std::string& genre) {
@@ -237,6 +255,10 @@ namespace core {
     void Song::setDuration(int sec) {
         _duration = sec;
     };
+
+    void Song::setAlbumId(unsigned id) {
+        _album_id = id;
+    }
 
     std::string Song::toString() const {
         std::string info = "{Musica: " + _title

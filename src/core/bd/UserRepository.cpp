@@ -58,8 +58,10 @@ namespace core {
     }
 
     bool UserRepository::save(User& entity) {
-        if (entity.getId() == 0 && count() > 1)
-            return false;
+        
+      // TODO Vamos limitar 2 usuarios apenas?
+        //if (entity.getId() == 0 && count() > 1)
+        //    return false;
 
         if (entity.getId() == 0)
             return insert(entity);

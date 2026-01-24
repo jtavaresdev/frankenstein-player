@@ -10,23 +10,26 @@
 #include <algorithm>
 
 namespace core {
-    Album::Album() : songsLoader([]() {return std::vector<std::shared_ptr<Song>>();}) {};
+    Album::Album()
+        : songsLoader([]() {
+              return std::vector<std::shared_ptr<Song>>();
+          }) {};
 
     // Album para mapRowToEntity
     Album::Album(unsigned id,
                  std::string title,
                  int year,
                  std::string genre,
-                 const Artist &artist,
-                 User &user) :
-        Entity(id),
-        _title(title),
-        _genre(genre),
-        _year(year),
-        _artist_id(artist.getId()),
-        songsLoader([]() {return std::vector<std::shared_ptr<Song>>();}) {
-
-        // Validações PRIMEIRO
+                 const Artist& artist,
+                 User& user)
+        : Entity(id),
+          _title(title),
+          _genre(genre),
+          _year(year),
+          _artist_id(artist.getId()),
+          songsLoader([]() {
+              return std::vector<std::shared_ptr<Song>>();
+          }) {
         if (title.empty()) {
             throw std::invalid_argument("Título do álbum não pode estar vazio");
         }
@@ -36,11 +39,14 @@ namespace core {
 
     Album::Album(const std::string title,
                  const std::string genre,
-                 const Artist &artist)
+                 const Artist& artist)
         : _title(title),
-        _genre(genre),
-        _artist_id(artist.getId()),
-        songsLoader([]() {return std::vector<std::shared_ptr<Song>>();}) {}
+          _genre(genre),
+          _artist_id(artist.getId()),
+          songsLoader([]() {
+              return std::vector<std::shared_ptr<Song>>();
+          }) {
+    }
 
     Album::Album(unsigned id,
                  std::string title,
@@ -48,12 +54,31 @@ namespace core {
                  std::string genre,
                  const Artist& artist)
         : Entity(id),
-        _title(title),
-        _genre(genre),
-        _year(year),
-        _artist_id(artist.getId()),
-        songsLoader([]() {return std::vector<std::shared_ptr<Song>>();}) {}
+          _title(title),
+          _genre(genre),
+          _year(year),
+          _artist_id(artist.getId()),
+          songsLoader([]() {
+              return std::vector<std::shared_ptr<Song>>();
+          }) {
+    }
 
+    Album::Album(const Album& other)
+        : Entity(other.getId()),
+          _title(other._title),
+          _genre(other._genre),
+          _year(other._year),
+          _user(other._user ? std::make_shared<User>(*other._user) : nullptr),
+          _artist_id(other._artist_id),
+          _artist(other._artist), 
+          _featuring_artists_ids(other._featuring_artists_ids),
+          _songs(other._songs),
+          _song_ids(other._song_ids),
+          _songsLoaded(other._songsLoaded),
+          songsLoader(other.songsLoader), 
+          artistLoader(other.artistLoader),
+          featuringArtistsLoader(other.featuringArtistsLoader) {
+           }
     // Getters
     std::string Album::getTitle() const {
         return _title;
@@ -79,7 +104,7 @@ namespace core {
     std::vector<unsigned> Album::getFeaturingArtistsId() const {
         auto _featuring_artists = featuringArtistsLoader();
         _featuring_artists_ids.clear();
-        for (auto const &a : _featuring_artists)
+        for (auto const& a : _featuring_artists)
             _featuring_artists_ids.push_back(a->getId());
 
         return std::vector<unsigned>(_featuring_artists_ids);
@@ -129,8 +154,9 @@ namespace core {
             _songs = songsLoader();
             _songsLoaded = true;
             _song_ids.clear();
-            for (const auto &s : _songs)
-                if (s) _song_ids.insert(s->getId());
+            for (const auto& s : _songs)
+                if (s)
+                    _song_ids.insert(s->getId());
         }
 
         return _songs;
@@ -351,7 +377,7 @@ namespace core {
         return _song_ids.find(songId) != _song_ids.end();
     };
 
-    bool Album::containsSong(const Song &song) const {
+    bool Album::containsSong(const Song& song) const {
         return containsSong(song.getId());
     };
 

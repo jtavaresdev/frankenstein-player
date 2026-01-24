@@ -49,7 +49,6 @@ if(BUILD_TESTING)
     FetchContent_Declare(
         doctest
         GIT_REPOSITORY https://github.com/doctest/doctest.git
-        GIT_TAG v2.4.11
     )
     FetchContent_MakeAvailable(doctest)
 endif()
@@ -58,7 +57,6 @@ endif()
 FetchContent_Declare(
     nlohmann_json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.11.2
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
@@ -74,7 +72,6 @@ else()
     FetchContent_Declare(
         taglib
         GIT_REPOSITORY https://github.com/taglib/taglib.git
-        GIT_TAG v2.0
     )
     FetchContent_MakeAvailable(taglib)
     set(TAGLIB_LINK_TARGET taglib)
@@ -228,7 +225,7 @@ if(BUILD_TESTING)
 
         add_test(NAME ${test_target} COMMAND ${test_target})
         set_tests_properties(${test_target} PROPERTIES
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             TIMEOUT 120
         )
     endforeach()

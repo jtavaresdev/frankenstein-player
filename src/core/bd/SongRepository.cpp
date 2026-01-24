@@ -9,6 +9,7 @@
 #include "core/entities/Song.hpp"
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 /*
@@ -48,7 +49,12 @@ namespace core {
         query.bind(2, entity.getDuration());
         query.bind(3, entity.getTrackNumber());
         query.bind(4, entity.getArtistId());
-        query.bind(5, entity.getAlbumId());
+        //query.bind(5, entity.getAlbumId());
+        if (entity.getAlbumId() == 0){
+          query.bind(5);
+        }else{
+          query.bind(5, entity.getAlbumId());
+        }
         query.bind(6, entity.getUser()->getId());
         query.bind(7, entity.getYear());
 
@@ -68,6 +74,7 @@ namespace core {
         query.bind(1, entity.getTitle());
         query.bind(2, entity.getArtistId());
         query.bind(3, entity.getUser()->getId());
+        query.bind(4, entity.getId());
 
         return query.exec() > 0;
     };
@@ -105,7 +112,13 @@ namespace core {
         song->setAlbumLoader(albumLoader);
 
         auto user_repo = UserRepository(_db);
-        song->setUser(*user_repo.findById(user_id));
+        auto user_ptr = user_repo.findById(user_id);
+        if (user_ptr){
+          song->setUser(*user_ptr);
+        }
+        else{
+          throw std::runtime_error("Usuário não encontrado, song id "+ std::to_string(id));
+        }
 
         return song;
     }

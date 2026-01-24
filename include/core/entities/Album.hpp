@@ -109,7 +109,7 @@ namespace core {
          * @brief Construtor de cópia da classe Album
          * @param other Outro objeto Album para copiar
          */
-        Album(const Album &other) = default;
+        Album(const Album &other);
 
         /**
          * @brief Operador de atribuição da classe Album

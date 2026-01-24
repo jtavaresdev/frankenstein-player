@@ -184,7 +184,6 @@ TEST_SUITE("Unit Tests - Entity: Song") {
             core::Song s("Song", this->artist1, this->album1);
             s.setAlbumLoader([this]() { return this->getAlbum(); });
             s.setArtistLoader([this]() { return this->getArtist(); });
-
             auto playableObjects = s.getPlayableObjects();
             CHECK(playableObjects.size() == 1);
         }

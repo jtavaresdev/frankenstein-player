@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "core/bd/UserRepository.hpp"
 #include "core/entities/User.hpp"
 #include "core/interfaces/IPlayable.hpp"
 #include "core/bd/SongRepository.hpp"
@@ -40,6 +41,7 @@ namespace core {
         std::shared_ptr<SongRepository> _songRepo;
         std::shared_ptr<ArtistRepository> _artistRepo;
         std::shared_ptr<AlbumRepository> _albumRepo;
+        std::shared_ptr<UserRepository> _userRepo;
         core::UsersManager _usersManager;
 
 
@@ -61,7 +63,7 @@ namespace core {
          * @return Retorna uma instância do objeto com os dados de título, artista e path tratados
          *
          */
-        std::shared_ptr<Song> readMetadata(TagLib::FileRef file, User &user);
+        std::shared_ptr<Song> readMetadata(TagLib::FileRef file, User &user,const std::string& sourceFilePath);
 
         /**
          * @brief Verifica ou cria o diretório antes de salvar uma música

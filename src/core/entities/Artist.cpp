@@ -31,6 +31,14 @@ namespace core {
         : Entity(), _name(name), _genre(genre),
        songsLoader([]() {return std::vector<std::shared_ptr<Song>>();}) {}
 
+    Artist::Artist(const Artist& other)
+        : Entity(other.getId()), 
+          _name(other._name),
+          _genre(other._genre),
+          _user(other._user ? std::make_shared<User>(*other._user) : nullptr),
+          _user_id(other._user_id),
+          songsLoader([]() {return std::vector<std::shared_ptr<Song>>();}) {}
+
     std::vector<std::shared_ptr<Song>> Artist::loadSongs() const {
     	if (!songsLoader) {
             throw std::runtime_error("Songs loader nao foi definido");
