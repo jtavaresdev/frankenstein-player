@@ -146,6 +146,8 @@ namespace core {
         std::string sql = "SELECT * FROM " + _table_name + " WHERE title LIKE ? AND user_id = ? ORDER BY title;";
 
         SQLite::Statement query = prepare(sql);
+
+
         query.bind(1, "%" + title + "%"); // "%" nao considera char especial
         query.bind(2, user.getId());
 

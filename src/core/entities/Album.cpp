@@ -3,6 +3,7 @@
 #include "core/bd/ArtistRepository.hpp"
 #include "core/entities/Artist.hpp"
 #include "core/entities/User.hpp"
+#include "core/util/UnicodeHelper.hpp"
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
@@ -37,7 +38,7 @@ namespace core {
         _user = std::make_shared<User>(user);
     };
 
-    Album::Album(const std::string title,
+    Album::Album(std::string title,
                  const std::string genre,
                  const Artist& artist)
         : _title(title),
@@ -66,20 +67,21 @@ namespace core {
     Album::Album(const Album& other)
         : Entity(other.getId()),
           _title(other._title),
+          _user(other._user ? std::make_shared<User>(*other._user) : nullptr),
           _genre(other._genre),
           _year(other._year),
-          _user(other._user ? std::make_shared<User>(*other._user) : nullptr),
           _artist_id(other._artist_id),
-          _artist(other._artist), 
+          _artist(other._artist),
           _featuring_artists_ids(other._featuring_artists_ids),
           _songs(other._songs),
           _song_ids(other._song_ids),
           _songsLoaded(other._songsLoaded),
-          songsLoader(other.songsLoader), 
+          songsLoader(other.songsLoader),
           artistLoader(other.artistLoader),
           featuringArtistsLoader(other.featuringArtistsLoader) {
-           }
+    }
     // Getters
+
     std::string Album::getTitle() const {
         return _title;
     };
@@ -224,12 +226,18 @@ namespace core {
     };
 
     std::string Album::toString() const {
-        std::string info = "{Album: " + _title
-                           + ", Artista: " + getArtist()->getName()
+        std::string artistName;
+        if (getArtist()) {
+            artistName = getArtist()->getName();
+        } else {
+            artistName = "Unknown Artist";
+        }
+
+        std::string info = "{Album: " + _title + ", Artista: " + artistName
                            + ", Ano: " + std::to_string(_year) + "}";
 
         return info;
-    };
+    }
     // Entity
 
     bool Album::operator==(const Entity& other) const {
@@ -351,6 +359,9 @@ namespace core {
     std::vector<std::shared_ptr<Song>>
     Album::findSongByTitle(const std::string& title) {
         loadSongs();
+
+        // TODO ver comportamento no windows
+        //  talvez criar um wrapper
 
         std::vector<std::shared_ptr<Song>> result;
 

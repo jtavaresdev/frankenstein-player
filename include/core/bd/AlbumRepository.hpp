@@ -19,7 +19,7 @@
 
 #include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/entities/Album.hpp"
-#include "core/entities/EntitiesFWD.hpp" // TODO incluir usuario
+#include "core/entities/EntitiesFWD.hpp" 
 #include "core/entities/Song.hpp"
 #include "core/entities/User.hpp"
 
@@ -29,7 +29,7 @@ namespace core {
      * @brief Repositorio de albuns
      * Repositorio para gerenciar operacoes de CRUD para a entidade Album.
      */
-    class AlbumRepository : public SQLiteRepositoryBase<Album> {
+    class AlbumRepository : public SQLiteRepositoryBase<Album>{
     protected:
         /**
          * @brief Insere um novo album no repositório
@@ -83,7 +83,7 @@ namespace core {
          * @return Vetor contendo os albuns que correspondem ao título fornecido
          */
         std::vector<std::shared_ptr<Album>>
-        findByTitleAndUser(const std::string &title, const User &user) const;
+        findByTitleAndUser(const std::string &title,const User &user) const;
 
         /**
          * @brief Busca albuns pelo usuário

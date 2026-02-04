@@ -5,6 +5,7 @@
 #include "core/entities/Artist.hpp"
 #include "core/entities/Entity.hpp"
 #include "core/entities/User.hpp"
+#include "core/util/UnicodeHelper.hpp"
 #include <memory>
 #include <miniaudio.h>
 #include <string>
@@ -61,8 +62,8 @@ namespace core {
           _user(other._user ? std::make_shared<User>(*other._user) : nullptr),
           _artist_id(other._artist_id),
           _album_id(other._album_id),
-          _artist(other._artist), // Copiar weak_ptr
-          _album(other._album),   // Copiar weak_ptr
+          _artist(other._artist),
+          _album(other._album),
           _featuring_artists_ids(other._featuring_artists_ids),
           artistLoader(other.artistLoader),
           albumLoader(other.albumLoader),
@@ -100,23 +101,6 @@ namespace core {
         return std::vector<unsigned>(_featuring_artists_ids);
     };
 
-    // std::vector<std::shared_ptr<const Artist>> Song::getFeaturingArtists() {
-    //     if (featuringArtistsLoader) {
-    //         auto allArtists = featuringArtistsLoader();
-    //         std::vector<std::shared_ptr<const Artist>> featuring;
-
-    //         if (allArtists.size() > 1) {
-    //             for (auto it = allArtists.begin(); it != allArtists.end();
-    //             ++it) {
-    //                 featuring.push_back(std::const_pointer_cast<const
-    //                 Artist>(*it));
-    //             }
-    //         }
-
-    //         return featuring;
-    //     }
-    //     return {};
-    // };
     std::vector<std::shared_ptr<const Artist>>
     Song::getFeaturingArtists() const {
         if (!featuringArtistsLoader) {
@@ -270,7 +254,7 @@ namespace core {
 
     std::vector<std::shared_ptr<IPlayableObject>>
     Song::getPlayableObjects() const {
-        return {std::make_shared<Song>(*this)}; // {} para converer em vector;
+        return {std::make_shared<Song>(*this)};
     };
 
     bool Song::operator==(const Entity& other) const {
@@ -356,12 +340,22 @@ namespace core {
     };
 
     std::string Song::getAudioFilePath() const {
-        std::string path = _user->getHomePath() + getArtist()->getName() + "/";
-        if (getAlbum())
-            path += getAlbum()->getTitle() + "/";
-        else
+        std::string path = _user->getHomePath();
+
+        std::string artistName =
+            UnicodeHelper::sanitizeFilename(getArtist()->getName());
+        path += artistName + "/";
+
+        if (getAlbum()) {
+            std::string albumTitle =
+                UnicodeHelper::sanitizeFilename(getAlbum()->getTitle());
+            path += albumTitle + "/";
+        } else {
             path += SINGLE_ALBUM;
-        path += getTitle() + ".mp3";
+        }
+
+        std::string title = UnicodeHelper::sanitizeFilename(getTitle());
+        path += title + ".mp3";
 
         return path;
     };
