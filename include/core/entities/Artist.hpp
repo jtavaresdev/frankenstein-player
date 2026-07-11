@@ -38,7 +38,11 @@ namespace core {
                    public core::ICollection,
                    public core::IPlayable {
     private:
-        std::string _name;
+#ifdef _WIN32
+      std::wstring _name;
+#else
+      std::string _name;
+#endif // _WIN32
         std::string _genre;
         mutable std::vector<std::shared_ptr<Song>> _songs;
         mutable std::unordered_set<unsigned int> _song_ids;
@@ -48,7 +52,6 @@ namespace core {
         mutable bool _albumsLoaded = false;
         std::shared_ptr<User> _user;
         unsigned _user_id;
-
         std::function<std::vector<std::shared_ptr<Song>>()> songsLoader;
         std::function<std::vector<std::shared_ptr<Album>>()> albumsLoader;
 
@@ -65,6 +68,8 @@ namespace core {
         std::vector<std::shared_ptr<Album>> loadAlbums() const;
 
     public:
+        using string_type = std::string;
+
         /**
          * @brief Construtor vazio
          */
@@ -88,15 +93,18 @@ namespace core {
 		 * @param name Nome do artista
 		 * @param user_id ID do usuário associado ao artista
 		 */
-        Artist(unsigned id, std::string name, const User &user);
-
+        Artist(unsigned id, 
+               std::string name,
+               const User &user);
 
         /**
          * @brief Construtor da classe Artist
          * @param name Nome do artista
          * @param genre Gênero musical do artista
          */
-        Artist(const std::string &name, const std::string &genre);
+        Artist(
+                const std::string &name,
+                const std::string &genre);
 
         /**
 		 * @brief Construtor de cópia da classe Artist
@@ -227,7 +235,9 @@ namespace core {
          * @return Vetor de ponteiros compartilhados para Song das músicas
          * encontradas
          */
-        std::vector<std::shared_ptr<Song>> findSongByTitle(const std::string &title) override;
+        std::vector<std::shared_ptr<Song>> 
+        findSongByTitle(const std::string &title) override;  
+
         /**
          * @brief Busca uma música de um artista pelo ID
          * @param songId ID da música a ser buscada

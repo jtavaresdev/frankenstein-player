@@ -20,7 +20,7 @@
 #include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/entities/Album.hpp"
 #include "core/entities/Artist.hpp"
-#include "core/entities/EntitiesFWD.hpp"  // TODO incluir usuario
+#include "core/entities/EntitiesFWD.hpp"
 #include "core/entities/Song.hpp"
 #include "core/entities/User.hpp"
 
@@ -84,7 +84,7 @@ namespace core {
          * @return Vetor contendo os artistas que correspondem ao nome fornecido
          */
         std::vector<std::shared_ptr<Artist>>
-        findByNameAndUser(const std::string& name, const User& user) const;
+        findByNameAndUser(const std::string& name,const User& user) const;
 
         /**
          * @brief Busca artistas pelo nome
@@ -110,4 +110,4 @@ namespace core {
         std::vector<std::shared_ptr<Song>> getSongs(const Artist& artist) const;
     };
 
-}  // namespace core
+} // namespace core

@@ -5,7 +5,10 @@
 #include "core/bd/SQLiteRepositoryBase.hpp"
 #include "core/bd/SongRepository.hpp"
 #include "core/bd/UserRepository.hpp"
+#include "core/entities/Artist.hpp"
+#include "core/util/UnicodeHelper.hpp"
 #include <memory>
+#include <string>
 
 /*
  * CREATE TABLE IF NOT EXISTS artists (
@@ -29,6 +32,7 @@ namespace core {
         std::string sql = "INSERT INTO " + _table_name + " (name, user_id) "
                           + "VALUES(?, ?);";
         SQLite::Statement query = prepare(sql);
+
         query.bind(1, entity.getName());
         query.bind(2, entity.getUser()->getId());
 
@@ -115,6 +119,8 @@ namespace core {
                           + " WHERE name LIKE ? AND user_id = ?;";
 
         SQLite::Statement query = prepare(sql);
+
+
         query.bind(1, "%" + name + "%");
         query.bind(2, user.getId());
 

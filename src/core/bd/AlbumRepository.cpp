@@ -1,3 +1,4 @@
+// AlbumRepository.cpp
 #include "core/bd/AlbumRepository.hpp"
 #include "SQLiteCpp/Statement.h"
 #include "core/bd/ArtistRepository.hpp"
@@ -6,20 +7,9 @@
 #include "core/bd/UserRepository.hpp"
 #include "core/entities/Album.hpp"
 #include "core/entities/Song.hpp"
+#include <iostream>
 #include <memory>
 #include <string>
-
-/*--
- * Tabela de álbuns
-    CREATE TABLE IF NOT EXISTS albums (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT UNIQUE NOT NULL,
-    release_year INTEGER,
-    genre TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    user_id INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE);
-*/
 
 namespace core {
 
@@ -48,9 +38,10 @@ namespace core {
     bool AlbumRepository::update(const Album& entity) {
         std::string sql = "UPDATE " + _table_name
                           + " SET title = ?, release_year = ?, genre = ?"
-                          + "WHERE id = ?";
+                          + " WHERE id = ?";
 
         SQLite::Statement query = prepare(sql);
+
         query.bind(1, entity.getTitle());
         query.bind(2, entity.getYear());
         query.bind(3, entity.getGenre());
@@ -62,6 +53,7 @@ namespace core {
     std::shared_ptr<Album>
     AlbumRepository::mapRowToEntity(SQLite::Statement& query) const {
         unsigned id = query.getColumn("id").getInt();
+
         std::string title = query.getColumn("title").getString();
         int year = query.getColumn("release_year").getInt();
         std::string genre = query.getColumn("genre").getString();
@@ -92,15 +84,19 @@ namespace core {
         if (!artist_ptr) {
             std::cerr << "ERROR: Principal artist not found for album id=" << id
                       << std::endl;
-            artist_ptr =
-                std::make_shared<Artist>(0, "Unknown Artist", *user_ptr);
+            Artist::string_type unknownName = "Unknown Artist";
+            artist_ptr = std::make_shared<Artist>(0, unknownName, *user_ptr);
         }
 
         auto album = std::make_shared<Album>(
             id, title, year, genre, *artist_ptr, *user_ptr);
 
         auto songs_loader = [this, id]() -> std::vector<std::shared_ptr<Song>> {
-            return this->getSongs(*this->findById(id));
+            auto albumPtr = this->findById(id);
+            if (albumPtr) {
+                return this->getSongs(*albumPtr);
+            }
+            return {};
         };
 
         auto artists_loader = [this,
@@ -114,11 +110,16 @@ namespace core {
         album->setFeaturingArtistsLoader(artists_loader);
 
         auto artist_loader = [this, id]() -> std::shared_ptr<Artist> {
-            return this->getArtist(*this->findById(id));
+            auto albumPtr = this->findById(id);
+            if (albumPtr) {
+                return this->getArtist(*albumPtr);
+            }
+            return nullptr;
         };
         album->setArtistLoader(artist_loader);
         return album;
     }
+
     bool AlbumRepository::save(Album& entity) {
         if (entity.getId() == 0) {
             return insert(entity);
@@ -131,7 +132,6 @@ namespace core {
         std::string sql = "DELETE FROM " + _table_name + " WHERE id = ?;";
 
         SQLite::Statement query = prepare(sql);
-
         query.bind(1, id);
 
         return query.exec() > 0;
@@ -144,6 +144,7 @@ namespace core {
                           + " WHERE title LIKE ? AND user_id = ?;";
 
         SQLite::Statement query = prepare(sql);
+
         query.bind(1, "%" + title + "%");
         query.bind(2, user.getId());
 
@@ -176,15 +177,15 @@ namespace core {
         std::string sql = "SELECT alb.* FROM albums alb "
                           "JOIN album_artists aa ON alb.id = aa.album_id "
                           "JOIN artists art ON aa.artist_id = art.id "
-                          "WHERE art.name = ? AND aa.is_principal = 1;";
+                          "WHERE art.name LIKE ? AND aa.is_principal = 1;";
 
         SQLite::Statement query = prepare(sql);
-        query.bind(1, artist_name);
+
+        query.bind(1, "%" + artist_name + "%");
+
         std::vector<std::shared_ptr<Album>> albums;
-        int count = 0;
 
         while (query.executeStep()) {
-            count++;
             try {
                 auto album = mapRowToEntity(query);
                 if (album) {
@@ -231,14 +232,14 @@ namespace core {
         query.bind(1, album.getId());
 
         std::vector<std::shared_ptr<Artist>> artists;
+        ArtistRepository artistRepo(_db);
+
         while (query.executeStep()) {
             unsigned id = query.getColumn("id").getInt();
-            std::string name = query.getColumn("name").getString();
-            unsigned user_id = query.getColumn("user_id").getInt();
-
-            // TODO carregar usuário do artista
-            // artists.push_back(std::make_shared<Artist>(id, name, user_id));
-            artists.push_back(std::make_shared<Artist>());
+            auto artist = artistRepo.findById(id);
+            if (artist) {
+                artists.push_back(artist);
+            }
         }
 
         return artists;
@@ -246,8 +247,20 @@ namespace core {
 
     std::shared_ptr<Artist>
     AlbumRepository::getArtist(const Album& album) const {
-        ArtistRepository artist_Repo(_db);
-        return artist_Repo.findById(album.getArtistId());
+        // Primeiro buscar o ID do artista principal da tabela album_artists
+        std::string sql = "SELECT artist_id FROM album_artists "
+                          "WHERE album_id = ? AND is_principal = 1 LIMIT 1;";
+
+        SQLite::Statement query(*_db, sql);
+        query.bind(1, album.getId());
+
+        if (query.executeStep()) {
+            unsigned artist_id = query.getColumn("artist_id").getInt();
+            ArtistRepository artist_repo(_db);
+            return artist_repo.findById(artist_id);
+        }
+
+        return nullptr;
     };
 
     size_t AlbumRepository::count() const {

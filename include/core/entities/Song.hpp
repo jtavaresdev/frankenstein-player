@@ -42,9 +42,11 @@ namespace core {
                  public core::IPlayable,
                  public core::IPlayableObject {
     private:
-        // std::string _file_path;
+#ifdef _WIN32
+        std::wstring _title;
+#else
         std::string _title;
-        // unsigned user_id;
+#endif // _WIN32
         std::shared_ptr<User> _user;
         unsigned _artist_id;
         mutable std::weak_ptr<Artist> _artist;
@@ -55,7 +57,6 @@ namespace core {
         std::string _genre;
         int _year;
         unsigned _track_number;
-        // bool _metadata_loaded;
 
         bool _artistLoaded = false;
         bool _albumLoaded = false;
@@ -72,6 +73,8 @@ namespace core {
         std::shared_ptr<Album> loadAlbum() const;
 
     public:
+        using string_type = std::string;
+
         /**
          * @brief Construtor padrão - inicializa uma música com valores padrão
          */

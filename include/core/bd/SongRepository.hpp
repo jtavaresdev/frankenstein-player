@@ -30,7 +30,7 @@ namespace core {
      * @brief Repositorio de musicas
      * Repositorio para gerenciar operacoes de CRUD para a entidade Song.
      */
-    class SongRepository : public SQLiteRepositoryBase<Song> {
+    class SongRepository : public SQLiteRepositoryBase<Song>{
     protected:
         /**
          * @brief Insere uma nova musica no repositório
